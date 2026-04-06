@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Categoria {
+  id          String      @id @default(uuid())
+  nome        String
+  descricao   String?
+  cor         String?
+  parentId    String?
+  teamId      String?
+  parent      Categoria?  @relation("SubCategorias", fields: [parentId], references: [id], onDelete: SetNull)
+  subcategorias Categoria[] @relation("SubCategorias")
+  scripts     Script[]
+  team        Team?       @relation("TeamCategorias", fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([nome, teamId])
+}
+
+enum Visibility {
+  TIME
+  GLOBAL
+}
+
+model Script {
+  id          String      @id @default(uuid())
+  titulo      String
+  descricao   String?
+  codigoSql   String
+  categoriaId String?
+  autorId     String?
+  teamId      String?
+  visibility  Visibility  @default(TIME)
+  favorito    Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  categoria   Categoria?  @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
+  tags        ScriptTag[]
+  autor       User?       @relation(fields: [autorId], references: [id], onDelete: SetNull)
+  team        Team?       @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  favorites   Favorite[]
+  versions    ScriptVersion[]
+}
+
+model Tag {
+  id      String      @id @default(uuid())
+  nome    String
+  teamId  String?
+  scripts ScriptTag[]
+  team    Team?       @relation("TeamTags", fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([nome, teamId])
+}
+
+model ScriptTag {
+  scriptId String
+  tagId    String
+  
+  Script   Script @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+  Tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([scriptId, tagId])
+}
+
+// ==========================================
+// NextAuth / Auth.js Identity Models
+// ==========================================
+
+enum UserRole {
+  NIVEL1
+  NIVEL2
+  ADMIN
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String?         @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole        @default(NIVEL1)
+  
+  teamId        String?
+  team          Team?           @relation("UserCurrentTeam", fields: [teamId], references: [id], onDelete: SetNull)
+
+  accounts      Account[]
+  sessions      Session[]
+  
+  scripts       Script[]
+  ownedTeams    Team[]          @relation("TeamOwner")
+  teamMembers   TeamMember[]
+  favorites     Favorite[]
+  scriptVersions ScriptVersion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  scriptId  String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  script    Script   @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scriptId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@unique([identifier, token])
+}
+
+// ==========================================
+// Permissões / Teams
+// ==========================================
+
+model Team {
+  id          String       @id @default(cuid())
+  nome        String
+  ownerId     String?
+  owner       User?        @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  members     TeamMember[]
+  users       User[]       @relation("UserCurrentTeam")
+  scripts     Script[]
+  categorias  Categoria[]  @relation("TeamCategorias")
+  tags        Tag[]        @relation("TeamTags")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+enum TeamRole {
+  MEMBER
+  ADMIN
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  userId    String
+  teamId    String
+  role      TeamRole @default(MEMBER)
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, teamId])
+}
+
+model ScriptVersion {
+  id          String   @id @default(cuid())
+  scriptId    String
+  codigoSql   String   @db.Text
+  titulo      String
+  descricao   String?  @db.Text
+  autorId     String?
+  createdAt   DateTime @default(now())
+  
+  script      Script   @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+  autor       User?    @relation(fields: [autorId], references: [id], onDelete: SetNull)
+
+  @@index([scriptId])
+}
