@@ -43,8 +43,12 @@ export function LoginForm() {
         <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-blue-500/10 p-3 rounded-full border border-blue-500/20">
           <Database className="w-8 h-8 text-blue-500" />
         </div>
-        <h1 className="text-3xl font-bold text-white mb-2 mt-12">Base SQL <span className="text-blue-500">v2</span></h1>
-        <p className="text-slate-400 text-sm">Acesse o seu repositório de inteligência corporativa.</p>
+        <h1 className="text-4xl font-black text-white mb-1 mt-12 uppercase tracking-tighter leading-none">
+          Base <span className="text-blue-500">SQL</span>
+        </h1>
+        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed">
+          Centralize, versione e compartilhe o conhecimento SQL da sua equipe
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
