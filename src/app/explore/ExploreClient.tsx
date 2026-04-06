@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Filter, Folder, Tags as TagsIcon, Clock, Database, X, ChevronDown, ChevronRight, Copy, Check, Eye, EyeOff } from 'lucide-react';
@@ -32,6 +32,7 @@ interface ExploreClientProps {
 
 export function ExploreClient({ initialScripts, categorias, tags, currentFilters }: ExploreClientProps) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const scripts = initialScripts;
   const [openTeams, setOpenTeams] = useState<Record<string, boolean>>({});
 
@@ -57,10 +58,16 @@ export function ExploreClient({ initialScripts, categorias, tags, currentFilters
     if (finalCategoria) params.set('categoria', finalCategoria);
     if (finalTag) params.set('tag', finalTag);
 
-    router.push(`/explore${params.toString() ? `?${params.toString()}` : ''}`);
+    startTransition(() => {
+      router.push(`/explore${params.toString() ? `?${params.toString()}` : ''}`);
+    });
   };
 
-  const clearAll = () => router.push('/explore');
+  const clearAll = () => {
+    startTransition(() => {
+      router.push('/explore');
+    });
+  };
 
   return (
     <div className="flex flex-1 h-[calc(100vh-4rem)] -m-6 bg-slate-950 overflow-hidden">
@@ -142,7 +149,14 @@ export function ExploreClient({ initialScripts, categorias, tags, currentFilters
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-6 lg:p-8">
+      <div className="flex-1 overflow-y-auto p-6 lg:p-8 relative">
+        {/* Top Loading Bar */}
+        {isPending && (
+          <div className="absolute top-0 left-0 right-0 h-1 z-50 overflow-hidden bg-blue-500/10">
+            <div className="h-full bg-blue-500 animate-[loading-bar_1.5s_infinite_ease-in-out] w-1/3" />
+          </div>
+        )}
+
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
