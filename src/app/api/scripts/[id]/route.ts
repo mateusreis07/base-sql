@@ -103,7 +103,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
             titulo,
             descricao,
             codigoSql,
-            autorId: session.user.id
+            autorId: (session?.user as any)?.id
           }
         } : undefined
       },
@@ -146,7 +146,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
         const otherFavoritesCount = await prisma.favorite.count({
             where: {
                 scriptId: id,
-                userId: { not: session.user.id }
+                userId: { not: (session?.user as any)?.id }
             }
         });
 

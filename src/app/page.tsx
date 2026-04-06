@@ -56,7 +56,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       autor: { select: { id: true, name: true } },
       team: { select: { nome: true } },
       favorites: {
-        where: { userId: session.user.id }
+        where: { userId: (session?.user as any)?.id || '' }
       }
     }
   });

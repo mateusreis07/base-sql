@@ -98,7 +98,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
         include: { Tag: true }
       },
       favorites: {
-        where: { userId: session.user.id }
+        where: { userId: (session?.user as any)?.id || '' }
       }
     }
   });

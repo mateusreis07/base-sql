@@ -11,8 +11,8 @@ export default async function FavoritosPage() {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
 
-  const userId = session.user.id;
-  const userTeamId = (session.user as any)?.teamId;
+  const userId = (session?.user as any)?.id || '';
+  const userTeamId = (session?.user as any)?.teamId;
 
   // Busca todos os favoritos do usuário com detalhes do script
   const favorites = await prisma.favorite.findMany({
