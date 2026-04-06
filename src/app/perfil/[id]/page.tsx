@@ -41,13 +41,34 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
   const [favoriteCount, globalCount, teamTotalCount, teamSharedCount, teamImpactCount] = await Promise.all([
     prisma.favorite.count({ where: { userId: userData.id, script: { visibility: 'GLOBAL' } } }),
     prisma.script.count({ where: { autorId: userData.id, visibility: 'GLOBAL' } }),
-    prisma.script.count({ where: { teamId: teamId } }),
-    prisma.script.count({ where: { teamId: teamId, visibility: 'GLOBAL' } }),
     prisma.script.count({ 
       where: { 
-        teamId: teamId, 
-        visibility: 'GLOBAL', 
-        favorites: { some: { user: { teamId: { not: teamId } } } } 
+        OR: [
+          { teamId: teamId },
+          { autor: { teamId: teamId } }
+        ]
+      } 
+    }),
+    prisma.script.count({ 
+      where: { 
+        visibility: 'GLOBAL',
+        OR: [
+          { teamId: teamId },
+          { autor: { teamId: teamId } }
+        ]
+      } 
+    }),
+    prisma.favorite.count({ 
+      where: { 
+        script: {
+          OR: [
+            { teamId: teamId },
+            { autor: { teamId: teamId } }
+          ]
+        },
+        user: {
+          teamId: { not: teamId }
+        }
       } 
     })
   ]);
