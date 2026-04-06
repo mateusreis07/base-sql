@@ -73,7 +73,9 @@ export default async function EditScriptPage({ params }: { params: Promise<{ id:
     codigoSql: script.codigoSql,
     categoriaId: script.categoriaId || '',
     tagIds: script.tags.map((t) => t.tagId),
-    visibility: script.visibility as 'TIME' | 'GLOBAL'
+    visibility: script.visibility as 'TIME' | 'GLOBAL',
+    tipoBanco: (script as any).tipoBanco || 'POSTGRESQL',
+    sistema: (script as any).sistema || 'SAJ5'
   };
 
   return (

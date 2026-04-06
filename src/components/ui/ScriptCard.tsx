@@ -105,12 +105,6 @@ export function ScriptCard({ script, isN1 = false }: ScriptCardProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 mt-2">
-            <span className={`text-[10px] px-2 py-0.5 font-bold uppercase rounded border flex items-center gap-1
-              ${script.visibility === 'GLOBAL' ? 'bg-blue-900/40 text-blue-400 border-blue-800/50' : 'bg-slate-800 text-slate-400 border-slate-700'}`}
-            >
-              {script.visibility === 'GLOBAL' ? <Globe className="w-3 h-3" /> : null}
-              {script.visibility === 'GLOBAL' ? 'Público' : 'Seu Time'}
-            </span>
 
             <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 border border-slate-700/50 text-slate-500 font-medium flex items-center gap-1">
               <Link 

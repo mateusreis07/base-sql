@@ -38,7 +38,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
 
     const { id } = await context.params;
     const body = await request.json();
-    const { titulo, descricao, codigoSql, categoriaId, tagIds, visibility } = body;
+    const { titulo, descricao, codigoSql, categoriaId, tagIds, visibility, tipoBanco, sistema } = body;
 
     // Busca o estado completo atual para salvar no histórico se houver mudanças
     const currentScript = await prisma.script.findUnique({
@@ -92,6 +92,8 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
         codigoSql, 
         categoriaId,
         visibility: visibility,
+        tipoBanco,
+        sistema,
         tags: tagIds && tagIds.length > 0 ? {
           create: tagIds.map((tid: string) => ({
             tagId: tid
@@ -103,6 +105,8 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
             titulo,
             descricao,
             codigoSql,
+            tipoBanco,
+            sistema,
             autorId: (session?.user as any)?.id
           }
         } : undefined

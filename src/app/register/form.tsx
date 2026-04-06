@@ -72,34 +72,34 @@ export function RegisterForm({ teams }: { teams: { id: string, nome: string }[] 
             {success}
           </div>
         )}
-        
+
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-300 ml-1">Nome Completo</label>
-          <input 
+          <input
             required
-            type="text" 
-            value={name} 
-            onChange={e => setName(e.target.value)} 
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600" 
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
             placeholder="Ex: Mateus Reis"
           />
         </div>
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-300 ml-1">E-mail corporativo</label>
-          <input 
-            required 
-            type="email" 
-            value={email} 
-            onChange={e => setEmail(e.target.value)} 
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600" 
+          <input
+            required
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
             placeholder="nome@empresa.com"
           />
         </div>
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-300 ml-1">Equipe Vinculada</label>
-          <select 
+          <select
             required
             value={teamSelection}
             onChange={e => setTeamSelection(e.target.value)}
@@ -114,7 +114,7 @@ export function RegisterForm({ teams }: { teams: { id: string, nome: string }[] 
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-300 ml-1">Perfil (Role)</label>
-          <select 
+          <select
             required
             value={role}
             onChange={e => setRole(e.target.value)}
@@ -128,27 +128,34 @@ export function RegisterForm({ teams }: { teams: { id: string, nome: string }[] 
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-300 ml-1">Senha Padrão Provisória</label>
-          <input 
-            required 
-            type="password" 
-            value={password} 
-            onChange={e => setPassword(e.target.value)} 
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600" 
+          <input
+            required
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
             placeholder="********"
           />
         </div>
 
-        <button 
-          disabled={loading} 
-          type="submit" 
+        <button
+          disabled={loading}
+          type="submit"
           className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-500 text-white font-bold py-3 rounded-lg mt-3 transition-colors shadow-lg shadow-emerald-900/20 disabled:opacity-50"
         >
           {loading ? 'Salvando...' : 'Adicionar Usuário ao Sistema'}
         </button>
 
-        <div className="text-center mt-2 border-t border-slate-800 pt-6">
-          <Link href="/" className="text-sm text-slate-400 hover:text-white transition-colors">
-            Voltar para a página inicial
+        <div className="flex flex-col gap-4 mt-2 border-t border-slate-800 pt-6">
+          <Link 
+            href="/users" 
+            className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-lg text-center transition-colors shadow-lg border border-slate-700 active:scale-[0.98] text-sm"
+          >
+            Gerenciar Usuários Existentes
+          </Link>
+          
+          <Link href="/" className="text-center text-xs text-slate-500 hover:text-slate-300 transition-colors uppercase font-black tracking-widest">
+            Voltar ao Início
           </Link>
         </div>
       </form>

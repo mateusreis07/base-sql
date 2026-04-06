@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: 'Private SQL Snippet Manager',
 };
 
+import { Providers } from '@/components/Providers';
+
 export default async function RootLayout({
   children,
 }: {
@@ -23,23 +25,25 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR" className="dark" suppressHydrationWarning>
       <body className={`${inter.className} bg-slate-950 text-slate-300 h-screen flex overflow-hidden antialiased`} suppressHydrationWarning>
-        {session?.user ? (
-          <>
-            <Sidebar user={session.user} />
-            <div className="flex flex-col flex-1 h-full min-w-0">
-              <Suspense fallback={<div className="h-16 bg-slate-900 border-b border-slate-800 w-full" />}>
-                <Header user={session.user} />
-              </Suspense>
-              <main className="flex-1 overflow-auto p-6 bg-slate-950 shadow-inner">
-                {children}
-              </main>
-            </div>
-          </>
-        ) : (
-          <main className="flex-1 w-full h-full bg-slate-950">
-            {children}
-          </main>
-        )}
+        <Providers>
+          {session?.user ? (
+            <>
+              <Sidebar user={session.user} />
+              <div className="flex flex-col flex-1 h-full min-w-0">
+                <Suspense fallback={<div className="h-16 bg-slate-900 border-b border-slate-800 w-full" />}>
+                  <Header user={session.user} />
+                </Suspense>
+                <main className="flex-1 overflow-auto p-6 bg-slate-950 shadow-inner">
+                  {children}
+                </main>
+              </div>
+            </>
+          ) : (
+            <main className="flex-1 w-full h-full bg-slate-950">
+              {children}
+            </main>
+          )}
+        </Providers>
       </body>
     </html>
   );

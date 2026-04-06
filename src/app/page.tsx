@@ -18,18 +18,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
   const isN1 = user.role === 'NIVEL1';
   const { q } = await searchParams;
   
-  // N1 vê dados restritos. 
-  const totalScripts = await prisma.script.count({
-    where: { OR: [{ visibility: 'GLOBAL' }, ...(user.teamId ? [{ teamId: user.teamId, visibility: 'TIME' as const }] : [])] }
-  });
-  const totalCategorias = await prisma.categoria.count();
+  // Busca totais para o dashboard
+  const totalScriptsSistema = await prisma.script.count();
+  const totalScriptsTime = user.teamId 
+    ? await prisma.script.count({ where: { teamId: user.teamId } })
+    : 0;
 
-  let where: any = {
-    OR: [
-      { visibility: 'GLOBAL' },
-      ...(user.teamId ? [{ teamId: user.teamId, visibility: 'TIME' as const }] : [])
-    ]
-  };
+  let where: any = {}; // Todos são globais agora
 
   if (q) {
     where = {
@@ -87,8 +82,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
                 <Database className="w-6 h-6 text-blue-500" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-400">Scripts Acessíveis</p>
-                <p className="text-2xl font-bold text-white mt-1">{totalScripts}</p>
+                <p className="text-sm font-medium text-slate-400">Total de Scripts</p>
+                <p className="text-2xl font-bold text-white mt-1">{totalScriptsSistema}</p>
               </div>
             </div>
           </div>
@@ -98,8 +93,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
                 <TrendingUp className="w-6 h-6 text-green-500" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-400">Categorias Ativas</p>
-                <p className="text-2xl font-bold text-white mt-1">{totalCategorias}</p>
+                <p className="text-sm font-medium text-slate-400">Scripts do Time</p>
+                <p className="text-2xl font-bold text-white mt-1">{totalScriptsTime}</p>
               </div>
             </div>
           </div>
@@ -133,7 +128,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
 
       <div className="mt-8">
         <h2 className="text-xl font-bold text-white mb-6">
-          {q ? `Resultados da busca por "${q}"` : 'Scripts Relevantes Recentes'}
+          {q ? `Resultados da busca por "${q}"` : 'Scripts adicionados Recentemente.'}
         </h2>
         
         {scripts.length === 0 ? (

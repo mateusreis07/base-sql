@@ -37,6 +37,8 @@ model Script {
   autorId     String?
   teamId      String?
   visibility  Visibility  @default(TIME)
+  tipoBanco   String      @default("POSTGRESQL")
+  sistema     String      @default("SAJ5")
   favorito    Boolean     @default(false)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -90,6 +92,7 @@ model User {
   
   teamId        String?
   team          Team?           @relation("UserCurrentTeam", fields: [teamId], references: [id], onDelete: SetNull)
+  cargo         String?
 
   accounts      Account[]
   sessions      Session[]
@@ -201,6 +204,8 @@ model ScriptVersion {
   codigoSql   String   @db.Text
   titulo      String
   descricao   String?  @db.Text
+  tipoBanco   String   @default("POSTGRESQL")
+  sistema     String   @default("SAJ5")
   autorId     String?
   createdAt   DateTime @default(now())
   

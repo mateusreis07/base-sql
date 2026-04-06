@@ -60,31 +60,31 @@ export function LoginForm() {
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-300 ml-1">E-mail</label>
-          <input 
-            required 
-            type="email" 
-            value={email} 
-            onChange={e => setEmail(e.target.value)} 
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600" 
-            placeholder="contato@mateus.dev"
+          <input
+            required
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
+            placeholder="mateus.pereira@softplan.com.br"
           />
         </div>
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-300 ml-1">Senha Mestra</label>
-          <input 
-            required 
-            type="password" 
-            value={password} 
-            onChange={e => setPassword(e.target.value)} 
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600" 
+          <input
+            required
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
             placeholder="********"
           />
         </div>
 
-        <button 
-          disabled={loading} 
-          type="submit" 
+        <button
+          disabled={loading}
+          type="submit"
           className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-500 text-white font-medium py-3 rounded-lg mt-3 transition-colors shadow-lg shadow-blue-900/20 disabled:opacity-50"
         >
           {loading ? 'Aguarde validando...' : 'Entrar na Base de Conhecimento'}

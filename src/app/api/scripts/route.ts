@@ -67,8 +67,14 @@ export async function POST(request: Request) {
     }
 
     const userRole = (session.user as any).role;
-    const userTeamId = (session.user as any).teamId;
     const userId = (session.user as any).id;
+
+    // Busca o time ATUAL no banco de dados para evitar ghost-null do JWT antigo
+    const currentUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { teamId: true }
+    });
+    const userTeamId = currentUser?.teamId;
 
     // N1 não edita, N1 não cria!
     if (userRole === 'NIVEL1') {
@@ -76,7 +82,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { titulo, descricao, codigoSql, categoriaId, tagIds, visibility } = body;
+    const { titulo, descricao, codigoSql, categoriaId, tagIds, visibility, tipoBanco, sistema } = body;
 
     const script = await prisma.script.create({
       data: { 
@@ -86,7 +92,9 @@ export async function POST(request: Request) {
         categoriaId,
         autorId: userId,
         teamId: userTeamId || null,
-        visibility: visibility || 'TIME',
+        visibility: visibility || 'GLOBAL',
+        tipoBanco: tipoBanco || 'POSTGRESQL',
+        sistema: sistema || 'SAJ5',
         tags: tagIds && tagIds.length > 0 ? {
           create: tagIds.map((id: string) => ({
             tagId: id
@@ -97,6 +105,8 @@ export async function POST(request: Request) {
             titulo,
             descricao,
             codigoSql,
+            tipoBanco: tipoBanco || 'POSTGRESQL',
+            sistema: sistema || 'SAJ5',
             autorId: userId
           }
         }

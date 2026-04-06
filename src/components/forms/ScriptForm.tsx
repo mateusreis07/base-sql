@@ -20,6 +20,8 @@ interface ScriptFormProps {
     categoriaId: string;
     tagIds: string[];
     visibility?: 'TIME' | 'GLOBAL';
+    tipoBanco?: string;
+    sistema?: string;
   };
   categorias: Categoria[];
   tags: Tag[];
@@ -37,7 +39,9 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
   const [codigoSql, setCodigoSql] = useState(initialData?.codigoSql || '');
   const [categoriaId, setCategoriaId] = useState(initialData?.categoriaId || '');
   const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tagIds || []);
-  const [visibility, setVisibility] = useState<'TIME' | 'GLOBAL'>(initialData?.visibility || 'TIME');
+  const [visibility] = useState<'TIME' | 'GLOBAL'>('GLOBAL');
+  const [tipoBanco, setTipoBanco] = useState(initialData?.tipoBanco || 'POSTGRESQL');
+  const [sistema, setSistema] = useState(initialData?.sistema || 'SAJ5');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -54,6 +58,8 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
       setTitulo(version.titulo);
       setDescricao(version.descricao || '');
       setCodigoSql(version.codigoSql);
+      setTipoBanco((version as any).tipoBanco || 'POSTGRESQL');
+      setSistema((version as any).sistema || 'SAJ5');
       
       // Atualiza o editor Monaco via ref para forçar a mudança visual imediata
       if (editorRef.current) {
@@ -101,6 +107,8 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
           categoriaId: categoriaId || null,
           tagIds: selectedTags,
           visibility,
+          tipoBanco,
+          sistema,
         }),
       });
 
@@ -253,6 +261,36 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
             </select>
           </div>
         </div>
+        
+        {/* Row 1.5: Script Type e Sistema */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1">Banco de Dados *</label>
+            <select 
+              required
+              value={tipoBanco}
+              onChange={e => setTipoBanco(e.target.value)}
+              disabled={isReadOnly}
+              className="w-full bg-slate-950 border border-slate-800 text-slate-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              <option value="POSTGRESQL">PostgreSQL</option>
+              <option value="MYSQL">MySQL</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1">Sistema *</label>
+            <select 
+              required
+              value={sistema}
+              onChange={e => setSistema(e.target.value)}
+              disabled={isReadOnly}
+              className="w-full bg-slate-950 border border-slate-800 text-slate-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              <option value="SAJ5">SAJ 5</option>
+              <option value="SAJ_ONLINE">SAJ Online</option>
+            </select>
+          </div>
+        </div>
 
         {/* Row 2: Descrição */}
         <div>
@@ -290,21 +328,6 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
           </div>
         </div>
 
-        {/* Row 3.5: Visibility */}
-        <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 p-4 rounded-lg">
-          <input 
-            type="checkbox"
-            id="isGlobalToggle"
-            checked={visibility === 'GLOBAL'}
-            disabled={isReadOnly}
-            onChange={(e) => setVisibility(e.target.checked ? 'GLOBAL' : 'TIME')}
-            className="w-4 h-4 text-blue-600 rounded bg-slate-950 border-slate-700 disabled:opacity-50"
-          />
-          <label htmlFor="isGlobalToggle" className={`text-sm font-medium select-none ${isReadOnly ? 'text-slate-500' : 'text-slate-300 cursor-pointer'}`}>
-            Tornar Público (Compartilhar script globalmente com todos os times)
-          </label>
-        </div>
-
         {/* Row 4: SqlEditor tomando espaço estendido e isolado na parte de baixo */}
         <div className="flex flex-col space-y-2 pt-4 border-t border-slate-800">
           <label className="block text-sm font-medium text-slate-400">Código SQL *</label>
@@ -318,6 +341,27 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
             />
           </div>
         </div>
+
+        {/* Action Buttons at the bottom for better UX on long scripts */}
+        {!isReadOnly && (
+          <div className="flex justify-end items-center pt-6 border-t border-slate-800 gap-4 mt-8">
+             <button 
+                type="button" 
+                onClick={() => router.back()}
+                className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                disabled={isSubmitting}
+              >
+                <X className="w-4 h-4" /> Cancelar
+              </button>
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg font-bold transition-all shadow-lg active:scale-95"
+              >
+                <Save className="w-4 h-4" /> {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
+              </button>
+          </div>
+        )}
       </form>
 
       {/* Seção de Histórico integrada se houver versões */}

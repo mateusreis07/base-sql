@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Plus, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
+import { Plus, LogOut, User as UserIcon, ChevronDown, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { CommandMenu } from './CommandMenu';
 import { logoutUser } from '@/app/actions/auth';
@@ -84,6 +84,14 @@ export function Header({ user }: { user?: any }) {
                 >
                   <UserIcon className="w-4 h-4 text-slate-500 group-hover:text-blue-400" />
                   Perfil
+                </Link>
+                <Link 
+                  href="/settings" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 w-full px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group"
+                >
+                  <Settings className="w-4 h-4 text-slate-500 group-hover:text-blue-400" />
+                  Configurações
                 </Link>
               </div>
 

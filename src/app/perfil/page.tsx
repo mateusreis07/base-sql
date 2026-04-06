@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
-import { User, Mail, Users, Calendar, Database, Sparkles, Star, Globe, Clock, ChevronRight } from 'lucide-react';
+import { User, Mail, Users, Calendar, Database, Sparkles, Star, Globe, Clock, ChevronRight, TrendingUp, Settings } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function ProfilePage() {
@@ -27,27 +27,11 @@ export default async function ProfilePage() {
 
   const teamId = userData.teamId;
 
-  // Busca scripts favoritos, globais e estatísticas do time para o resumo
-  const [favoriteCount, globalCount, teamTotalCount, teamSharedCount, teamImpactCount] = await Promise.all([
+  // Busca totais para os cards (estilo dashboard)
+  const [totalScriptsSistema, totalScriptsTime, favoriteCount, teamImpactCount] = await Promise.all([
+    prisma.script.count(),
+    teamId ? prisma.script.count({ where: { teamId } }) : Promise.resolve(0),
     prisma.favorite.count({ where: { userId: userData.id } }),
-    prisma.script.count({ where: { autorId: userData.id, visibility: 'GLOBAL' } }),
-    prisma.script.count({ 
-      where: { 
-        OR: [
-          { teamId: teamId },
-          { autor: { teamId: teamId } }
-        ]
-      } 
-    }),
-    prisma.script.count({ 
-      where: { 
-        visibility: 'GLOBAL',
-        OR: [
-          { teamId: teamId },
-          { autor: { teamId: teamId } }
-        ]
-      } 
-    }),
     prisma.favorite.count({ 
       where: { 
         script: {
@@ -83,8 +67,6 @@ export default async function ProfilePage() {
             <ChevronRight className="w-4 h-4" />
             <span className="text-slate-300 text-sm font-bold uppercase tracking-widest">Seu Perfil</span>
         </div>
-        <h1 className="text-3xl font-black text-white tracking-tight uppercase">Seu Centro de Comando</h1>
-        <p className="text-slate-500 mt-1 text-sm font-medium uppercase tracking-wider">Visão geral das suas atividades e impacto da equipe na plataforma.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -98,9 +80,13 @@ export default async function ProfilePage() {
             </div>
             
             <h2 className="text-2xl font-black text-white tracking-tight truncate">{userData.name}</h2>
-            <div className={`mt-3 inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${roleColors[userData.role]}`}>
-              {roleLabels[userData.role]}
-            </div>
+            <Link 
+              href="/settings"
+              className={`mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all group/cargo ${userData.cargo ? roleColors[userData.role] : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'}`}
+            >
+              {userData.cargo || 'Cargo'}
+              <Settings className={`w-3 h-3 transition-all group-hover/cargo:rotate-90 ${userData.cargo ? 'opacity-70' : 'text-slate-500 group-hover/cargo:text-blue-400'}`} />
+            </Link>
             
             <div className="mt-10 space-y-4 text-left">
               <div className="group flex items-center gap-4 p-4 bg-slate-950/40 border border-slate-800/50 rounded-2xl transition-all">
@@ -148,25 +134,25 @@ export default async function ProfilePage() {
         <div className="lg:col-span-8 space-y-6">
           {/* Stats em Grid de 3 colunas */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group hover:border-blue-500/50 transition-colors">
                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
                   <Database className="w-12 h-12 text-blue-500" />
                </div>
                <div className="flex flex-col h-full relative z-10">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Scripts da Equipe</span>
-                  <p className="text-4xl font-black text-white leading-none mb-2">{teamTotalCount}</p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-auto uppercase tracking-wider">Total produzidos pelo time</p>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Total de Scripts</span>
+                  <p className="text-4xl font-black text-white leading-none mb-2">{totalScriptsSistema}</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-auto uppercase tracking-wider">Disponíveis no sistema</p>
                </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group hover:border-emerald-500/50 transition-colors">
                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Globe className="w-12 h-12 text-emerald-400" />
+                  <TrendingUp className="w-12 h-12 text-emerald-400" />
                </div>
                <div className="flex flex-col h-full relative z-10">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Compartilhados (Time)</span>
-                  <p className="text-4xl font-black text-emerald-400 leading-none mb-2">{teamSharedCount}</p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-auto uppercase tracking-wider">Scripts públicos da equipe</p>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Scripts do Time</span>
+                  <p className="text-4xl font-black text-emerald-400 leading-none mb-2">{totalScriptsTime}</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-auto uppercase tracking-wider">Membro de {userData.team?.nome || 'Global'}</p>
                </div>
             </div>
 
