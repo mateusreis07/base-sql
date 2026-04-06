@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as any,
   session: { strategy: "jwt" },
   providers: [
     Credentials({
@@ -19,13 +19,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
         
-        let user = await prisma.user.findUnique({
+        let user = await (prisma as any).user.findUnique({
           where: { email: credentials.email as string }
         });
 
         if (!user && credentials.name) {
           const hashedPassword = await bcrypt.hash(credentials.password as string, 10);
-          user = await prisma.user.create({
+          user = await (prisma as any).user.create({
             data: {
               email: credentials.email as string,
               name: credentials.name as string,

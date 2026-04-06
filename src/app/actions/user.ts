@@ -9,7 +9,7 @@ export async function updateUserCargo(cargo: string) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Não autorizado');
 
-  await prisma.user.update({
+  await (prisma as any).user.update({
     where: { id: session.user.id },
     data: { cargo }
   });
@@ -39,7 +39,7 @@ export async function changeUserPassword(formData: any) {
     throw new Error('As novas senhas não coincidem');
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await (prisma as any).user.findUnique({
     where: { id: session.user.id }
   });
 
@@ -50,7 +50,7 @@ export async function changeUserPassword(formData: any) {
 
   const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
-  await prisma.user.update({
+  await (prisma as any).user.update({
     where: { id: session.user.id },
     data: { password: hashedNewPassword }
   });
@@ -60,7 +60,7 @@ export async function changeUserPassword(formData: any) {
 
 export async function resetUserPassword(userId: string) {
   const session = await auth();
-  if (session?.user?.role !== 'ADMIN' && session?.user?.role !== 'NIVEL2') {
+  if ((session?.user as any)?.role !== 'ADMIN' && (session?.user as any)?.role !== 'NIVEL2') {
      // Apenas usuários com certas permissões podem resetar senhas de outros.
      // Se o projeto usa apenas ADMIN para isso, ajuste conforme necessário.
      throw new Error('Não autorizado');
@@ -68,7 +68,7 @@ export async function resetUserPassword(userId: string) {
 
   const hashedPassword = await bcrypt.hash('123456', 10);
 
-  await prisma.user.update({
+  await (prisma as any).user.update({
     where: { id: userId },
     data: { password: hashedPassword }
   });
