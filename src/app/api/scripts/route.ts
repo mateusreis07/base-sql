@@ -85,7 +85,7 @@ export async function POST(request: Request) {
         codigoSql, 
         categoriaId,
         autorId: userId,
-        teamId: visibility === 'TIME' ? userTeamId : null,
+        teamId: userTeamId || null,
         visibility: visibility || 'TIME',
         tags: tagIds && tagIds.length > 0 ? {
           create: tagIds.map((id: string) => ({
