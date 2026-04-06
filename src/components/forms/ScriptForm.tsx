@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { SqlEditor } from '@/components/editor/SqlEditor';
-import { Save, X, AlertCircle } from 'lucide-react';
+import { Save, X, AlertCircle, Trash2 } from 'lucide-react';
 
 import { ScriptVersionHistory } from '@/components/ui/ScriptVersionHistory';
 
@@ -25,9 +25,10 @@ interface ScriptFormProps {
   tags: Tag[];
   isReadOnly?: boolean;
   versions?: Version[];
+  canDelete?: boolean;
 }
 
-export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, versions = [] }: ScriptFormProps) {
+export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, versions = [], canDelete = false }: ScriptFormProps) {
   const router = useRouter();
   const editorRef = useRef<any>(null);
 
@@ -128,6 +129,32 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
     }
   };
 
+  const handleDelete = async () => {
+    if (!initialData?.id || !confirm('Tem certeza que deseja excluir permanentemente este script? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMsg('');
+    
+    try {
+      const res = await fetch(`/api/scripts/${initialData.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Erro ao excluir script');
+      }
+
+      router.push('/');
+      router.refresh();
+    } catch (error: any) {
+      setErrorMsg(error.message || 'Erro ao excluir script');
+      setIsSubmitting(false);
+    }
+  };
+
   const toggleTag = (id: string) => {
     setSelectedTags(prev => 
       prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]
@@ -160,13 +187,26 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
                 Voltar
               </button>
             ) : (
-              <button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-md font-medium transition-colors"
-              >
-                <Save className="w-4 h-4" /> {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
-              </button>
+              <div className="flex gap-2">
+                {isEditing && canDelete && (
+                  <button 
+                    type="button" 
+                    onClick={handleDelete}
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2 bg-red-950/30 hover:bg-red-900/40 text-red-400 border border-red-950 px-4 py-2 rounded-md font-medium transition-all disabled:opacity-50"
+                    title="Excluir Script"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                >
+                  <Save className="w-4 h-4" /> {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
+              </div>
             )}
           </div>
         </div>

@@ -42,7 +42,9 @@ export default async function EditScriptPage({ params }: { params: Promise<{ id:
     redirect('/');
   }
 
+  const userId = (session.user as any)?.id;
   const isReadOnly = userRole === 'NIVEL1' || !canEdit;
+  const canDelete = userRole === 'ADMIN' || script.autorId === userId;
 
   const categorias = await prisma.categoria.findMany({ 
     where: {
@@ -111,6 +113,7 @@ export default async function EditScriptPage({ params }: { params: Promise<{ id:
           tags={tags} 
           isReadOnly={isReadOnly} 
           versions={script.versions as any}
+          canDelete={canDelete}
         />
       </section>
     </div>

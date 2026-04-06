@@ -141,6 +141,16 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
         return NextResponse.json({ error: 'Script não encontrado' }, { status: 404 });
     }
 
+    const userRole = (session?.user as any)?.role;
+    const userId = (session?.user as any)?.id;
+
+    // REGRA: Somente ADMIN ou o PRÓPRIO AUTOR pode excluir
+    if (userRole !== 'ADMIN' && script.autorId !== userId) {
+        return NextResponse.json({ 
+            error: 'Permissão negada: Somente o autor do script ou um administrador podem realizar a exclusão.' 
+        }, { status: 403 });
+    }
+
     // REGRA: Se o script é GLOBAL
     if (script.visibility === 'GLOBAL') {
         const otherFavoritesCount = await prisma.favorite.count({
