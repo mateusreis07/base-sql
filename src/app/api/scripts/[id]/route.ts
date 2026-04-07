@@ -106,7 +106,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
             tipoBanco,
             sistema,
             autorId: (session?.user as any)?.id
-          }
+          } as any
         } : undefined
       },
       include: {
