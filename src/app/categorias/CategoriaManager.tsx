@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Folder, Edit2, Trash2, X, Save } from 'lucide-react';
+import { Plus, Folder, Edit2, Trash2, X, Save, Check, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -16,6 +16,7 @@ export function CategoriaManager({ initialCategorias, isNivel1 = false }: { init
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
   const [cor, setCor] = useState('#3b82f6');
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
 
   const openForm = (cat?: Categoria) => {
     if (cat) {
@@ -35,6 +36,7 @@ export function CategoriaManager({ initialCategorias, isNivel1 = false }: { init
   const closeForm = () => {
     setIsFormOpen(false);
     setEditingId(null);
+    setIsColorPickerOpen(false);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -119,15 +121,60 @@ export function CategoriaManager({ initialCategorias, isNivel1 = false }: { init
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Cor</label>
-              <div className="flex items-center gap-3">
-                <input 
-                  type="color"
-                  value={cor}
-                  onChange={e => setCor(e.target.value)}
-                  className="h-[38px] w-16 bg-slate-950 border border-slate-800 rounded-md p-1 cursor-pointer"
-                />
-                <span className="text-sm text-slate-500 uppercase">{cor}</span>
+              <label className="block text-sm font-medium text-slate-400 mb-2">Cor da Categoria</label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
+                  className="flex items-center gap-3 bg-slate-950 border border-slate-800 rounded-lg p-2 focus:ring-2 focus:ring-blue-500/50 hover:border-slate-700 transition-all w-full md:w-auto min-w-[160px]"
+                >
+                  <div className="w-6 h-6 rounded shadow-inner" style={{ backgroundColor: cor }} />
+                  <span className="text-slate-300 text-xs font-mono uppercase font-medium">{cor}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-500 ml-auto transition-transform ${isColorPickerOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isColorPickerOpen && (
+                  <>
+                    <div className="fixed inset-0 z-[150]" onClick={() => setIsColorPickerOpen(false)} />
+                    <div className="absolute left-0 top-full mt-2 z-[200] bg-slate-900 border border-slate-800 p-2.5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-150">
+                       <div className="grid grid-cols-5 gap-1.5 w-[160px]">
+                        {['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#06b6d4', '#f43f5e', '#a855f7', '#22c55e', '#0ea5e9', '#94a3b8', '#000000', '#ffffff'].map(pColor => (
+                          <button
+                            key={pColor}
+                            type="button"
+                            onClick={() => {
+                              setCor(pColor);
+                              setIsColorPickerOpen(false);
+                            }}
+                            className={`w-full aspect-square rounded cursor-pointer border hover:scale-110 active:scale-95 transition-all ${cor.toLowerCase() === pColor.toLowerCase() ? 'border-white ring-1 ring-white/20 shadow-md' : 'border-white/10'}`}
+                            style={{ backgroundColor: pColor }}
+                          />
+                        ))}
+                        {/* Native Picker Trigger */}
+                        <div className="relative w-full aspect-square rounded border border-slate-700 bg-slate-800 flex items-center justify-center hover:bg-slate-700 transition-colors group cursor-pointer overflow-hidden">
+                          <Plus className="w-4 h-4 text-slate-400 group-hover:text-white" />
+                          <input 
+                            type="color"
+                            value={cor}
+                            onChange={e => setCor(e.target.value)}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full scale-[2] bg-transparent border-none outline-none"
+                            title="Escolher cor manual"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-slate-800 flex items-center gap-2">
+                        <span className="text-[10px] text-slate-500 font-bold">HEX:</span>
+                        <input 
+                          type="text"
+                          value={cor}
+                          onChange={e => setCor(e.target.value)}
+                          placeholder="# HEX"
+                          className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-[10px] font-mono text-slate-300 outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
             <div className="md:col-span-2">

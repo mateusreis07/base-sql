@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Users, Edit2, Trash2, X, Save, ShieldAlert, User as UserIcon, LogOut, Check, Briefcase } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 type Team = { 
   id: string; 
@@ -200,9 +201,9 @@ export function TeamManager({ initialTeams = [], allUsers = [] }: { initialTeams
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={closeForm} />
           
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col max-h-[90vh] overflow-visible animate-in fade-in zoom-in duration-200">
             {/* Header */}
-            <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+            <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
               <div>
                 <h2 className="text-xl font-bold text-white flex items-center gap-3">
                   {teams.find(t => t.id === editingId)?.isGlobal ? <Briefcase className="w-6 h-6 text-amber-500" /> : <Users className="w-6 h-6 text-blue-500" />}
@@ -233,7 +234,7 @@ export function TeamManager({ initialTeams = [], allUsers = [] }: { initialTeams
             )}
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto p-8">
+            <div className="flex-1 p-8">
               {activeTab === 'basic' ? (
                 <form id="team-form" onSubmit={handleSave} className="space-y-6">
                   {error && (
@@ -256,36 +257,31 @@ export function TeamManager({ initialTeams = [], allUsers = [] }: { initialTeams
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-slate-400 ml-1">Gestor Responsável</label>
-                    <select 
+                    <CustomSelect 
                       value={ownerId}
-                      onChange={e => setOwnerId(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none"
-                    >
-                      <option value="">👤 Selecione um Gestor (Opcional)</option>
-                      {allUsers.map(u => (
-                        <option key={u.id} value={u.id}>{u.name || u.email}</option>
-                      ))}
-                    </select>
+                      onChange={setOwnerId}
+                      placeholder="👤 Selecione um Gestor (Opcional)"
+                      options={allUsers.map(u => ({ value: u.id, label: u.name || u.email || 'Usuário Sem Nome' }))}
+                      className="w-full"
+                    />
                     <p className="text-[10px] text-slate-500 ml-1">O gestor aparece como referência no card da equipe.</p>
                   </div>
                 </form>
               ) : (
                 <div className="space-y-6">
                    <div className="relative">
-                      <select 
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            toggleMember(e.target.value, false);
-                            e.target.value = "";
-                          }
+                      <CustomSelect 
+                        value=""
+                        onChange={(val) => {
+                          if (val) toggleMember(val, false);
                         }}
-                        className="w-full bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 appearance-none font-medium cursor-pointer"
-                      >
-                        <option value="" className="bg-slate-900 text-slate-400">➕ Vincular Novo Membro...</option>
-                        {allUsers.filter(u => !currentMembers.find(m => m.id === u.id)).map(u => (
-                          <option key={u.id} value={u.id} className="bg-slate-900 text-white">{u.name || u.email}</option>
-                        ))}
-                      </select>
+                        placeholder="➕ Vincular Novo Membro..."
+                        options={allUsers
+                          .filter(u => !currentMembers.find(m => m.id === u.id))
+                          .map(u => ({ value: u.id, label: u.name || u.email || 'Usuário Sem Nome' }))
+                        }
+                        className="w-full"
+                      />
                    </div>
 
                    <div className="space-y-3">
@@ -327,7 +323,7 @@ export function TeamManager({ initialTeams = [], allUsers = [] }: { initialTeams
 
             {/* Footer */}
             {activeTab === 'basic' && (
-              <div className="p-6 border-t border-slate-800 bg-slate-900/50 flex gap-3">
+              <div className="p-6 border-t border-slate-800 bg-slate-900/50 flex gap-3 rounded-b-2xl">
                 <button 
                   form="team-form"
                   type="submit" 

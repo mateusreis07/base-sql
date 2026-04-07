@@ -7,6 +7,7 @@ import { Search, Filter, Folder, Tags as TagsIcon, Clock, Database, X, ChevronDo
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ScriptCard } from '@/components/ui/ScriptCard';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 type Categoria = { id: string; nome: string; cor?: string | null; team?: { id: string; nome: string } | null; _count?: { scripts: number } };
 type Tag = { id: string; nome: string };
@@ -137,30 +138,32 @@ export function ExploreClient({ initialScripts, categorias, tags, teams, current
             <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5 opacity-80">
               <Database className="w-3.5 h-3.5" /> Banco de Dados
             </h3>
-            <select 
+            <CustomSelect 
               value={currentFilters.tipoBanco || ''}
-              onChange={(e) => updateFilters({ tipoBanco: e.target.value || null })}
-              className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-md px-2 py-1.5 focus:ring-1 focus:ring-blue-500 outline-none appearance-none cursor-pointer hover:border-slate-700 transition-colors"
-            >
-              <option value="">Todos os Bancos</option>
-              <option value="POSTGRESQL">PostgreSQL</option>
-              <option value="MYSQL">MySQL</option>
-            </select>
+              onChange={(val) => updateFilters({ tipoBanco: val || null })}
+              size="sm"
+              options={[
+                { value: '', label: 'Todos os Bancos' },
+                { value: 'POSTGRESQL', label: 'PostgreSQL' },
+                { value: 'MYSQL', label: 'MySQL' }
+              ]}
+            />
           </div>
 
           <div>
             <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5 opacity-80">
               <Clock className="w-3.5 h-3.5" /> Sistema
             </h3>
-            <select 
+            <CustomSelect 
               value={currentFilters.sistema || ''}
-              onChange={(e) => updateFilters({ sistema: e.target.value || null })}
-              className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-md px-2 py-1.5 focus:ring-1 focus:ring-blue-500 outline-none appearance-none cursor-pointer hover:border-slate-700 transition-colors"
-            >
-              <option value="">Todos os Sistemas</option>
-              <option value="SAJ5">SAJ 5</option>
-              <option value="SAJ_ONLINE">SAJ Online</option>
-            </select>
+              onChange={(val) => updateFilters({ sistema: val || null })}
+              size="sm"
+              options={[
+                { value: '', label: 'Todos os Sistemas' },
+                { value: 'SAJ5', label: 'SAJ 5' },
+                { value: 'SAJ_ONLINE', label: 'SAJ Online' }
+              ]}
+            />
           </div>
         </div>
 

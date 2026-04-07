@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Database } from 'lucide-react';
 import Link from 'next/link';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 export function RegisterForm({ teams }: { teams: { id: string, nome: string }[] }) {
   const router = useRouter();
@@ -99,31 +100,32 @@ export function RegisterForm({ teams }: { teams: { id: string, nome: string }[] 
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-300 ml-1">Equipe Vinculada</label>
-          <select
-            required
+          <CustomSelect 
             value={teamSelection}
-            onChange={e => setTeamSelection(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-          >
-            <option value="global">💼 Diretoria Global (Sem Time Específico)</option>
-            {teams.map(t => (
-              <option key={t.id} value={t.id}>🏢 {t.nome}</option>
-            ))}
-          </select>
+            onChange={setTeamSelection}
+            placeholder="Selecione uma Equipe..."
+            options={[
+              { value: 'global', label: '💼 Diretoria Global (Sem Time Específico)' },
+              ...teams.map(t => ({ value: t.id, label: `🏢 ${t.nome}` }))
+            ]}
+            className="w-full"
+          />
         </div>
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-300 ml-1">Perfil (Role)</label>
-          <select
-            required
+          <CustomSelect 
             value={role}
-            onChange={e => setRole(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-          >
-            <option value="NIVEL1">Nível 1 (Acesso em Leitura Focada)</option>
-            <option value="NIVEL2">Nível 2 (Criador de Queries para o Time)</option>
-            <option value="ADMIN">Admin (Acesso Total / Diretoria)</option>
-          </select>
+            onChange={setRole}
+            placeholder="Selecione o Nível..."
+            options={[
+              { value: 'NIVEL1', label: 'Nível 1 (Acesso em Leitura Focada)' },
+              { value: 'NIVEL2', label: 'Nível 2 (Criador de Queries para o Time)' },
+              { value: 'ADMIN', label: 'Admin (Acesso Total / Diretoria)' }
+            ]}
+            searchable={false}
+            className="w-full"
+          />
         </div>
 
         <div className="space-y-1">

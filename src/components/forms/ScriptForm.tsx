@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SqlEditor } from '@/components/editor/SqlEditor';
-import { Save, X, AlertCircle, Trash2 } from 'lucide-react';
+import { Save, X, AlertCircle, Trash2, ChevronDown, Check } from 'lucide-react';
 
 import { ScriptVersionHistory } from '@/components/ui/ScriptVersionHistory';
 
 type Categoria = { id: string; nome: string };
 type Tag = { id: string; nome: string };
 type Version = { id: string; titulo: string; descricao: string | null; codigoSql: string; createdAt: string | Date; autor?: { name: string | null } };
+
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 interface ScriptFormProps {
   initialData?: {
@@ -248,17 +250,15 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-1">Categoria</label>
-            <select 
+            <CustomSelect 
               value={categoriaId}
-              onChange={e => setCategoriaId(e.target.value)}
+              onChange={setCategoriaId}
               disabled={isReadOnly}
-              className="w-full bg-slate-950 border border-slate-800 text-slate-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              <option value="">Nenhuma categoria</option>
-              {categorias.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.nome}</option>
-              ))}
-            </select>
+              options={[
+                { value: '', label: 'Nenhuma categoria' },
+                ...categorias.map(cat => ({ value: cat.id, label: cat.nome }))
+              ]}
+            />
           </div>
         </div>
         
@@ -266,29 +266,27 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-1">Banco de Dados *</label>
-            <select 
-              required
+            <CustomSelect 
               value={tipoBanco}
-              onChange={e => setTipoBanco(e.target.value)}
+              onChange={setTipoBanco}
               disabled={isReadOnly}
-              className="w-full bg-slate-950 border border-slate-800 text-slate-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              <option value="POSTGRESQL">PostgreSQL</option>
-              <option value="MYSQL">MySQL</option>
-            </select>
+              options={[
+                { value: 'POSTGRESQL', label: 'PostgreSQL' },
+                { value: 'MYSQL', label: 'MySQL' }
+              ]}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-1">Sistema *</label>
-            <select 
-              required
+            <CustomSelect 
               value={sistema}
-              onChange={e => setSistema(e.target.value)}
+              onChange={setSistema}
               disabled={isReadOnly}
-              className="w-full bg-slate-950 border border-slate-800 text-slate-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              <option value="SAJ5">SAJ 5</option>
-              <option value="SAJ_ONLINE">SAJ Online</option>
-            </select>
+              options={[
+                { value: 'SAJ5', label: 'SAJ 5' },
+                { value: 'SAJ_ONLINE', label: 'SAJ Online' }
+              ]}
+            />
           </div>
         </div>
 

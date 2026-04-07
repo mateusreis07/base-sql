@@ -27,7 +27,7 @@ export default async function RegisterPage() {
   });
 
   return (
-    <div className="flex min-h-full w-full items-center justify-center bg-slate-950 p-4 relative pb-20">
+    <div className="flex min-h-full w-full items-center justify-center bg-slate-950 p-4 relative pb-20 overflow-hidden">
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-purple-900/10 rounded-full blur-[100px] pointer-events-none" />
       
