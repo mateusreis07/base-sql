@@ -63,12 +63,12 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
       setCodigoSql(version.codigoSql);
       setTipoBanco((version as any).tipoBanco || 'POSTGRESQL');
       setSistema((version as any).sistema || 'SAJ5');
-      
+
       // Atualiza o editor Monaco via ref para forçar a mudança visual imediata
       if (editorRef.current) {
         editorRef.current.setValue(version.codigoSql);
       }
-      
+
       // Forçar scroll para o topo para que o usuário veja os campos alterados
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -81,7 +81,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
-    
+
     // Obter o valor real do editor (bypass React state sync issues)
     const currentCode = editorRef.current?.getValue ? editorRef.current.getValue() : codigoSql;
     const isSqlChanged = isEditing && currentCode !== initialData.codigoSql;
@@ -90,7 +90,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
       setErrorMsg('O Título é obrigatório.');
       return;
     }
-    
+
     if (!currentCode || !currentCode.trim()) {
       setErrorMsg('O Código SQL é obrigatório e não pode ficar vazio.');
       return;
@@ -126,7 +126,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
         const data = await res.json();
         throw new Error(data.error || 'Erro ao salvar script');
       }
-      
+
       const savedScript = await res.json();
 
       if (isEditing) {
@@ -134,7 +134,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
         setSuccessMsg('Alterações salvas com sucesso!');
         setMotivo(''); // Limpar o motivo após salvar
         router.refresh(); // Refresh Server Components data
-        
+
         // Limpar após 5s
         setTimeout(() => setSuccessMsg(''), 5000);
       } else {
@@ -155,7 +155,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
 
     setIsSubmitting(true);
     setErrorMsg('');
-    
+
     try {
       const res = await fetch(`/api/scripts/${initialData.id}`, {
         method: 'DELETE',
@@ -175,14 +175,14 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
   };
 
   const toggleTag = (id: string) => {
-    setSelectedTags(prev => 
+    setSelectedTags(prev =>
       prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]
     );
   };
 
   return (
-    <div className="space-y-12">
-      <form onSubmit={handleSubmit} className="w-full max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-12 overflow-visible">
+      <form onSubmit={handleSubmit} className="w-full max-w-7xl mx-auto space-y-8 overflow-visible">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-800/60 py-4 -mt-4">
           <div>
             <h2 className="text-2xl font-black text-white tracking-tighter uppercase">
@@ -192,22 +192,22 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
               Organize e evolua seu repositório de consultas
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             {!isReadOnly && (
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => router.back()}
                 className="group flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-white transition-all text-sm font-bold uppercase tracking-widest"
               >
                 <X className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" /> Cancelar
               </button>
             )}
-            
+
             <div className="flex items-center gap-2">
               {isEditing && canDelete && !isReadOnly && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={handleDelete}
                   disabled={isSubmitting}
                   className="flex items-center justify-center bg-red-950/20 hover:bg-red-900/40 text-red-400 border border-red-900/30 w-11 h-11 rounded-xl transition-all disabled:opacity-50 active:scale-95 shadow-lg shadow-red-900/10"
@@ -216,14 +216,14 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
                   <Trash2 className="w-5 h-5" />
                 </button>
               )}
-              
+
               {!isReadOnly && (
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isSubmitting}
                   className="flex items-center gap-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-500/30 active:scale-95 group"
                 >
-                  <Save className="w-4 h-4 group-hover:scale-110 transition-transform" /> 
+                  <Save className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   {isSubmitting ? 'Processando...' : 'Salvar Alterações'}
                 </button>
               )}
@@ -247,12 +247,12 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           <div className="lg:col-span-3 space-y-8">
             <div className="bg-slate-900/40 border border-slate-800/60 p-8 rounded-[2rem] space-y-6 backdrop-blur-sm">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] ml-1">Essencial: Título do Script *</label>
-                <input 
+                <input
                   required
                   value={titulo}
                   onChange={e => setTitulo(e.target.value)}
@@ -264,7 +264,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-1">Contextualização (Descrição Detalhada)</label>
-                <textarea 
+                <textarea
                   value={descricao}
                   onChange={e => setDescricao(e.target.value)}
                   disabled={isReadOnly}
@@ -284,7 +284,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
               </div>
               <div className="w-full h-[550px] rounded-2xl overflow-hidden border border-slate-800/80 shadow-2xl relative group/editor">
                 <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover/editor:opacity-100 transition-opacity pointer-events-none z-10" />
-                <SqlEditor 
+                <SqlEditor
                   value={codigoSql}
                   onChange={(val) => setCodigoSql(val || '')}
                   onMount={handleEditorDidMount}
@@ -299,7 +299,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
                 <label className="block text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 animate-pulse" /> Motivo desta Versão *
                 </label>
-                <textarea 
+                <textarea
                   required
                   value={motivo}
                   onChange={e => setMotivo(e.target.value)}
@@ -313,16 +313,16 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
           </div>
 
           <div className="space-y-6">
-            <div className="bg-slate-900/60 border border-slate-800/60 p-6 rounded-[2rem] space-y-8 sticky top-28">
+            <div className="bg-slate-900/60 border border-slate-800/60 p-6 rounded-[2rem] space-y-8">
               <div>
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
                   <Database className="w-3.5 h-3.5 text-blue-500" /> Atributos Técnicos
                 </h3>
-                
+
                 <div className="space-y-5">
                   <div className="space-y-2">
                     <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Categoria</label>
-                    <CustomSelect 
+                    <CustomSelect
                       value={categoriaId}
                       onChange={setCategoriaId}
                       disabled={isReadOnly}
@@ -334,21 +334,21 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Engine DB *</label>
-                    <CustomSelect 
+                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Banco de Dados *</label>
+                    <CustomSelect
                       value={tipoBanco}
                       onChange={setTipoBanco}
                       disabled={isReadOnly}
                       options={[
                         { value: 'POSTGRESQL', label: 'PostgreSQL' },
-                        { value: 'MYSQL', label: 'MySQL' }
+                        { value: 'ORACLE', label: 'Oracle' }
                       ]}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Ecossistema *</label>
-                    <CustomSelect 
+                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Sistema *</label>
+                    <CustomSelect
                       value={sistema}
                       onChange={setSistema}
                       disabled={isReadOnly}
@@ -373,8 +373,8 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
                        disabled={isReadOnly}
                        onClick={() => toggleTag(tag.id)}
                        className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all duration-300 ${
-                         selectedTags.includes(tag.id) 
-                           ? 'bg-blue-600/20 border-blue-500/50 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
+                         selectedTags.includes(tag.id)
+                           ? 'bg-blue-600/20 border-blue-500/50 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.1)]'
                            : 'bg-slate-950/50 border-slate-800/80 text-slate-600 hover:border-slate-600 hover:text-slate-400 opacity-60'
                        }`}
                      >

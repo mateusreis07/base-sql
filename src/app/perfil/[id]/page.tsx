@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { notFound, redirect } from 'next/navigation';
-import { Mail, Users, Calendar, Database, Sparkles, Star, Globe, Clock, ChevronRight } from 'lucide-react';
+import { Mail, Users, Calendar, Database, Sparkles, Star, Globe, Clock, ChevronRight, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
 interface PublicProfileProps {
@@ -101,9 +101,9 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         {/* Lado Esquerdo: Identidade do Usuário */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-600 via-teal-500 to-blue-600"></div>
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600"></div>
             
-            <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-800 mx-auto flex items-center justify-center text-4xl font-black text-white shadow-[0_0_40px_rgba(16,185,129,0.2)] mb-6 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
+            <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-800 mx-auto flex items-center justify-center text-4xl font-black text-white shadow-[0_0_40px_rgba(37,99,235,0.3)] mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-500">
               {userData.name?.[0]?.toUpperCase() || userData.email?.[0]?.toUpperCase()}
             </div>
             
@@ -113,22 +113,22 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
             </div>
             
             <div className="mt-10 space-y-4 text-left">
-              <div className="group flex items-center gap-4 p-4 bg-slate-950/40 border border-slate-800/50 rounded-2xl hover:border-emerald-500/30 transition-all">
-                <div className="bg-emerald-500/10 p-2.5 rounded-xl text-emerald-500">
+              <div className="group flex items-center gap-4 p-4 bg-slate-950/40 border border-slate-800/50 rounded-2xl transition-all">
+                <div className="bg-indigo-500/10 p-2.5 rounded-xl text-indigo-500">
                   <Users className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Time</span>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Lotação Atual</span>
                   <span className="text-sm text-slate-200 font-black truncate">{userData.team?.nome || 'Diretoria Global'}</span>
                 </div>
               </div>
 
-              <div className="group flex items-center gap-4 p-4 bg-slate-950/40 border border-slate-800/50 rounded-2xl hover:border-blue-500/30 transition-all">
-                <div className="bg-blue-500/10 p-2.5 rounded-xl text-blue-500">
+              <div className="group flex items-center gap-4 p-4 bg-slate-950/40 border border-slate-800/50 rounded-2xl transition-all">
+                <div className="bg-purple-500/10 p-2.5 rounded-xl text-purple-500">
                   <Calendar className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Entrou em</span>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Membro desde</span>
                   <span className="text-sm text-slate-200 font-black">{new Date(userData.createdAt).toLocaleDateString('pt-BR')}</span>
                 </div>
               </div>
@@ -139,25 +139,25 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         {/* Lado Direito: Atividade Pública e do Time */}
         <div className="lg:col-span-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group hover:border-blue-500/50 transition-colors">
                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
                   <Database className="w-12 h-12 text-blue-500" />
                </div>
                <div className="flex flex-col h-full relative z-10">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Scripts da Equipe</span>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Total de Scripts</span>
                   <p className="text-4xl font-black text-white leading-none mb-2">{teamTotalCount}</p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-auto uppercase tracking-wider">Total produzidos pelo time</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-auto uppercase tracking-wider">Disponíveis no sistema</p>
                </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group hover:border-emerald-500/50 transition-colors">
                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Globe className="w-12 h-12 text-emerald-500" />
+                  <TrendingUp className="w-12 h-12 text-emerald-400" />
                </div>
                <div className="flex flex-col h-full relative z-10">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Compartilhados (Time)</span>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Scripts do Time</span>
                   <p className="text-4xl font-black text-emerald-400 leading-none mb-2">{teamSharedCount}</p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-auto uppercase tracking-wider">Scripts públicos da equipe</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-auto uppercase tracking-wider">Membro de {userData.team?.nome || 'Global'}</p>
                </div>
             </div>
 
@@ -172,6 +172,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
                </div>
             </div>
           </div>
+
 
           <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
             <div className="px-8 py-6 border-b border-slate-800 flex items-center justify-between bg-slate-950/20">
