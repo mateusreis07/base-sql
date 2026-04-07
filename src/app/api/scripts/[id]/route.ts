@@ -38,7 +38,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
 
     const { id } = await context.params;
     const body = await request.json();
-    const { titulo, descricao, codigoSql, categoriaId, tagIds, visibility, tipoBanco, sistema } = body;
+    const { titulo, descricao, codigoSql, categoriaId, tagIds, visibility, tipoBanco, sistema, motivo } = body;
 
     // Busca o estado completo atual para salvar no histórico se houver mudanças
     const currentScript = await prisma.script.findUnique({
@@ -72,11 +72,8 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
         }
     }
 
-    // Verifica se houve mudança real para poupar versões duplicadas
-    const hasChanged = 
-        titulo !== currentScript.titulo || 
-        descricao !== currentScript.descricao || 
-        codigoSql !== currentScript.codigoSql;
+    // Verifica se houve mudança no código SQL para decidir se cria uma nova versão
+    const hasSqlChanged = codigoSql !== currentScript.codigoSql;
 
     if (tagIds && Array.isArray(tagIds)) {
       await prisma.scriptTag.deleteMany({
@@ -99,11 +96,12 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
             tagId: tid
           }))
         } : undefined,
-        // Cria versão se houver mudança relevante
-        versions: hasChanged ? {
+        // Cria versão APENAS se o código SQL mudou
+        versions: hasSqlChanged ? {
           create: {
             titulo,
             descricao,
+            motivo,
             codigoSql,
             tipoBanco,
             sistema,

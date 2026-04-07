@@ -9,6 +9,7 @@ interface Version {
   id: string;
   titulo: string;
   descricao: string | null;
+  motivo: string | null;
   codigoSql: string;
   createdAt: string | Date;
   autor?: { name: string | null } | null;
@@ -300,14 +301,28 @@ export function ScriptVersionHistory({ versions, onRestore }: ScriptVersionHisto
 
               {isExpanded && (
                 <div className="px-6 pb-8 pt-2 space-y-8 animate-in slide-in-from-top-4 duration-500">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="p-5 bg-slate-950/40 rounded-3xl border border-slate-800/40 hover:border-slate-700/60 transition-colors group/card">
-                       <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em] mb-3 block group-hover/card:text-blue-500 transition-colors">Mudanças no Título</span>
-                       <p className="text-sm font-black text-slate-100 uppercase tracking-tight">{version.titulo}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
+                    {/* Motivo (Protagonista da Versão) */}
+                    <div className="md:col-span-3 p-6 bg-blue-600/5 rounded-3xl border border-blue-500/20 hover:border-blue-500/40 transition-all group/card shadow-sm shadow-blue-500/5">
+                       <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.3em] mb-4 block">Mensagem da Alteração</span>
+                       <p className="text-base font-bold text-white leading-relaxed uppercase tracking-tight">
+                         {version.motivo || (index === versions.length - 1 ? 'Publicação Inicial' : 'Sem motivo registrado')}
+                       </p>
                     </div>
-                    <div className="p-5 bg-slate-950/40 rounded-3xl border border-slate-800/40 hover:border-slate-700/60 transition-colors group/card">
-                       <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em] mb-3 block group-hover/card:text-blue-500 transition-colors">Contextualização</span>
-                       <p className="text-sm text-slate-400 leading-relaxed italic">{version.descricao || 'Nenhuma nota de alteração registrada.'}</p>
+
+                    {/* Metadados Unificados (Discretos) */}
+                    <div className="md:col-span-2 p-6 bg-slate-950/30 rounded-3xl border border-slate-800/40 hover:border-slate-700/60 transition-all flex flex-col justify-center space-y-4">
+                       <div className="space-y-1">
+                          <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Metadata do Snapshot</span>
+                          <p className="text-xs font-bold text-slate-300 uppercase truncate" title={version.titulo}>
+                             {version.titulo}
+                          </p>
+                       </div>
+                       <div className="pt-2 border-t border-slate-800/50">
+                          <p className="text-[11px] text-slate-500 leading-relaxed italic line-clamp-2" title={version.descricao || ''}>
+                             {version.descricao || 'Nenhuma descrição técnica informada.'}
+                          </p>
+                       </div>
                     </div>
                   </div>
 

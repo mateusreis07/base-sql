@@ -3,13 +3,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SqlEditor } from '@/components/editor/SqlEditor';
-import { Save, X, AlertCircle, Trash2, ChevronDown, Check } from 'lucide-react';
+import { Save, X, AlertCircle, Trash2, ChevronDown, Check, Database, Terminal, GitCommit } from 'lucide-react';
 
 import { ScriptVersionHistory } from '@/components/ui/ScriptVersionHistory';
 
 type Categoria = { id: string; nome: string };
 type Tag = { id: string; nome: string };
-type Version = { id: string; titulo: string; descricao: string | null; codigoSql: string; createdAt: string | Date; autor?: { name: string | null } };
+type Version = { id: string; titulo: string; descricao: string | null; motivo: string | null; codigoSql: string; createdAt: string | Date; autor?: { name: string | null } };
 
 import { CustomSelect } from '@/components/ui/CustomSelect';
 
@@ -44,6 +44,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
   const [visibility] = useState<'TIME' | 'GLOBAL'>('GLOBAL');
   const [tipoBanco, setTipoBanco] = useState(initialData?.tipoBanco || 'POSTGRESQL');
   const [sistema, setSistema] = useState(initialData?.sistema || 'SAJ5');
+  const [motivo, setMotivo] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -83,6 +84,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
     
     // Obter o valor real do editor (bypass React state sync issues)
     const currentCode = editorRef.current?.getValue ? editorRef.current.getValue() : codigoSql;
+    const isSqlChanged = isEditing && currentCode !== initialData.codigoSql;
 
     if (!titulo.trim()) {
       setErrorMsg('O Título é obrigatório.');
@@ -91,6 +93,11 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
     
     if (!currentCode || !currentCode.trim()) {
       setErrorMsg('O Código SQL é obrigatório e não pode ficar vazio.');
+      return;
+    }
+
+    if (isSqlChanged && !motivo.trim()) {
+      setErrorMsg('Por favor, descreva o motivo desta alteração para o histórico.');
       return;
     }
 
@@ -111,6 +118,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
           visibility,
           tipoBanco,
           sistema,
+          motivo: isSqlChanged ? motivo : isEditing ? 'Atualização de metadados' : 'Versão inicial',
         }),
       });
 
@@ -124,6 +132,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
       if (isEditing) {
         setIsSubmitting(false);
         setSuccessMsg('Alterações salvas com sucesso!');
+        setMotivo(''); // Limpar o motivo após salvar
         router.refresh(); // Refresh Server Components data
         
         // Limpar após 5s
@@ -173,198 +182,235 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
 
   return (
     <div className="space-y-12">
-      <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 p-6 rounded-lg w-full max-w-6xl mx-auto space-y-6">
-        <div className="flex justify-between items-center pb-4 border-b border-slate-800">
-          <h2 className="text-xl font-bold text-white">
-            {isReadOnly ? 'Visualização de Script Público' : isEditing ? 'Editar Script' : 'Novo Script SQL'}
-          </h2>
-          <div className="flex gap-3">
+      <form onSubmit={handleSubmit} className="w-full max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-800/60 py-4 -mt-4">
+          <div>
+            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">
+              {isReadOnly ? 'Visualização de Script' : isEditing ? 'Editar Script' : 'Novo Script SQL'}
+            </h2>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-1">
+              Organize e evolua seu repositório de consultas
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
             {!isReadOnly && (
               <button 
                 type="button" 
                 onClick={() => router.back()}
-                className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                className="group flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-white transition-all text-sm font-bold uppercase tracking-widest"
               >
-                <X className="w-4 h-4" /> Cancelar
+                <X className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" /> Cancelar
               </button>
             )}
-            {isReadOnly ? (
-              <button 
-                type="button" 
-                onClick={() => router.back()}
-                className="flex items-center bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
-              >
-                Voltar
-              </button>
-            ) : (
-              <div className="flex gap-2">
-                {isEditing && canDelete && (
-                  <button 
-                    type="button" 
-                    onClick={handleDelete}
-                    disabled={isSubmitting}
-                    className="flex items-center gap-2 bg-red-950/30 hover:bg-red-900/40 text-red-400 border border-red-950 px-4 py-2 rounded-md font-medium transition-all disabled:opacity-50"
-                    title="Excluir Script"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
+            
+            <div className="flex items-center gap-2">
+              {isEditing && canDelete && !isReadOnly && (
+                <button 
+                  type="button" 
+                  onClick={handleDelete}
+                  disabled={isSubmitting}
+                  className="flex items-center justify-center bg-red-950/20 hover:bg-red-900/40 text-red-400 border border-red-900/30 w-11 h-11 rounded-xl transition-all disabled:opacity-50 active:scale-95 shadow-lg shadow-red-900/10"
+                  title="Excluir Script Permanentemente"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              )}
+              
+              {!isReadOnly && (
                 <button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                  className="flex items-center gap-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-500/30 active:scale-95 group"
                 >
-                  <Save className="w-4 h-4" /> {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
+                  <Save className="w-4 h-4 group-hover:scale-110 transition-transform" /> 
+                  {isSubmitting ? 'Processando...' : 'Salvar Alterações'}
                 </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {successMsg && (
+            <div className="p-4 bg-emerald-950/30 border border-emerald-900/50 rounded-2xl flex items-center gap-4 text-emerald-100 animate-in fade-in slide-in-from-top-2 duration-500">
+               <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.7)]" />
+               <p className="text-sm font-bold tracking-tight">{successMsg}</p>
+            </div>
+          )}
+
+          {errorMsg && (
+            <div className="p-4 bg-red-950/30 border border-red-900/50 rounded-2xl flex items-center gap-4 text-red-100 animate-in shake duration-500">
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <p className="text-sm font-bold tracking-tight">{errorMsg}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-3 space-y-8">
+            <div className="bg-slate-900/40 border border-slate-800/60 p-8 rounded-[2rem] space-y-6 backdrop-blur-sm">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] ml-1">Essencial: Título do Script *</label>
+                <input 
+                  required
+                  value={titulo}
+                  onChange={e => setTitulo(e.target.value)}
+                  disabled={isReadOnly}
+                  placeholder="Ex: Faturamento Consolidado por Regional"
+                  className="w-full bg-slate-950/50 border border-slate-800 text-slate-100 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-600/50 focus:border-blue-500/50 focus:outline-none transition-all placeholder:text-slate-700 text-lg font-bold shadow-inner"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-1">Contextualização (Descrição Detalhada)</label>
+                <textarea 
+                  value={descricao}
+                  onChange={e => setDescricao(e.target.value)}
+                  disabled={isReadOnly}
+                  placeholder="Explique detalhadamente o que este script resolve e como utilizá-lo..."
+                  rows={4}
+                  className="w-full bg-slate-950/50 border border-slate-800 text-slate-300 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-blue-800/30 focus:border-blue-700/30 focus:outline-none transition-all placeholder:text-slate-800 leading-relaxed italic"
+                />
+              </div>
+            </div>
+
+            <div className="bg-slate-900/40 border border-slate-800/60 p-8 rounded-[2rem] space-y-4 backdrop-blur-sm shadow-2xl">
+              <div className="flex items-center justify-between pb-2">
+                <label className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] ml-1 flex items-center gap-2">
+                  <Check className="w-3 h-3" /> Core: Linguagem SQL *
+                </label>
+                <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest bg-slate-950 px-3 py-1 rounded-full border border-slate-800">Editor Monaco v0.45</span>
+              </div>
+              <div className="w-full h-[550px] rounded-2xl overflow-hidden border border-slate-800/80 shadow-2xl relative group/editor">
+                <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover/editor:opacity-100 transition-opacity pointer-events-none z-10" />
+                <SqlEditor 
+                  value={codigoSql}
+                  onChange={(val) => setCodigoSql(val || '')}
+                  onMount={handleEditorDidMount}
+                  height="100%"
+                  readOnly={isReadOnly}
+                />
+              </div>
+            </div>
+
+            {isEditing && !isReadOnly && codigoSql !== initialData?.codigoSql && (
+              <div className="p-8 bg-blue-600/5 border border-blue-600/20 rounded-[2rem] space-y-4 animate-in slide-in-from-left-4 duration-700">
+                <label className="block text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 animate-pulse" /> Motivo desta Versão *
+                </label>
+                <textarea 
+                  required
+                  value={motivo}
+                  onChange={e => setMotivo(e.target.value)}
+                  placeholder="Por que você alterou o código SQL? (Ex: Otimização de Performance, Correção de Join...)"
+                  rows={2}
+                  className="w-full bg-slate-950/80 border border-blue-900/30 text-slate-100 rounded-2xl px-5 py-4 focus:ring-4 focus:ring-blue-600/20 focus:outline-none placeholder:text-blue-900/50 transition-all font-bold text-sm tracking-tight"
+                />
+                <p className="text-[10px] text-blue-500/60 font-black uppercase tracking-widest text-right">Registro Permanente de Engenharia</p>
               </div>
             )}
           </div>
-        </div>
 
-        {successMsg && (
-          <div className="p-4 bg-emerald-950/40 border border-emerald-900 rounded-md flex items-center gap-3 text-emerald-200 animate-in fade-in slide-in-from-top-2 duration-500">
-             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-             <p className="text-sm font-medium">{successMsg}</p>
-          </div>
-        )}
+          <div className="space-y-6">
+            <div className="bg-slate-900/60 border border-slate-800/60 p-6 rounded-[2rem] space-y-8 sticky top-28">
+              <div>
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                  <Database className="w-3.5 h-3.5 text-blue-500" /> Atributos Técnicos
+                </h3>
+                
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Categoria</label>
+                    <CustomSelect 
+                      value={categoriaId}
+                      onChange={setCategoriaId}
+                      disabled={isReadOnly}
+                      options={[
+                        { value: '', label: 'Nenhuma Selecionada' },
+                        ...categorias.map(cat => ({ value: cat.id, label: cat.nome }))
+                      ]}
+                    />
+                  </div>
 
-        {errorMsg && (
-          <div className="p-4 bg-red-950/50 border border-red-900 rounded-md flex items-center gap-3 text-red-200">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <p>{errorMsg}</p>
-          </div>
-        )}
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Engine DB *</label>
+                    <CustomSelect 
+                      value={tipoBanco}
+                      onChange={setTipoBanco}
+                      disabled={isReadOnly}
+                      options={[
+                        { value: 'POSTGRESQL', label: 'PostgreSQL' },
+                        { value: 'MYSQL', label: 'MySQL' }
+                      ]}
+                    />
+                  </div>
 
-        {/* Row 1: Título e Categoria */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Título *</label>
-            <input 
-              required
-              value={titulo}
-              onChange={e => setTitulo(e.target.value)}
-              disabled={isReadOnly}
-              placeholder="Ex: Pegar faturamento por mês"
-              className="w-full bg-slate-950 border border-slate-800 text-slate-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Categoria</label>
-            <CustomSelect 
-              value={categoriaId}
-              onChange={setCategoriaId}
-              disabled={isReadOnly}
-              options={[
-                { value: '', label: 'Nenhuma categoria' },
-                ...categorias.map(cat => ({ value: cat.id, label: cat.nome }))
-              ]}
-            />
-          </div>
-        </div>
-        
-        {/* Row 1.5: Script Type e Sistema */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Banco de Dados *</label>
-            <CustomSelect 
-              value={tipoBanco}
-              onChange={setTipoBanco}
-              disabled={isReadOnly}
-              options={[
-                { value: 'POSTGRESQL', label: 'PostgreSQL' },
-                { value: 'MYSQL', label: 'MySQL' }
-              ]}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Sistema *</label>
-            <CustomSelect 
-              value={sistema}
-              onChange={setSistema}
-              disabled={isReadOnly}
-              options={[
-                { value: 'SAJ5', label: 'SAJ 5' },
-                { value: 'SAJ_ONLINE', label: 'SAJ Online' }
-              ]}
-            />
-          </div>
-        </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Ecossistema *</label>
+                    <CustomSelect 
+                      value={sistema}
+                      onChange={setSistema}
+                      disabled={isReadOnly}
+                      options={[
+                        { value: 'SAJ5', label: 'SAJ 5' },
+                        { value: 'SAJ_ONLINE', label: 'SAJ Online' }
+                      ]}
+                    />
+                  </div>
+                </div>
+              </div>
 
-        {/* Row 2: Descrição */}
-        <div>
-          <label className="block text-sm font-medium text-slate-400 mb-1">Descrição</label>
-          <textarea 
-            value={descricao}
-            onChange={e => setDescricao(e.target.value)}
-            disabled={isReadOnly}
-            placeholder="Explique o propósito deste script..."
-            rows={3}
-            className="w-full bg-slate-950 border border-slate-800 text-slate-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-          />
-        </div>
+              <div className="pt-6 border-t border-slate-800/50 space-y-4">
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-2">
+                  <Terminal className="w-3.5 h-3.5 text-emerald-500" /> Tags de Descoberta
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map(tag => (
+                     <button
+                       key={tag.id}
+                       type="button"
+                       disabled={isReadOnly}
+                       onClick={() => toggleTag(tag.id)}
+                       className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all duration-300 ${
+                         selectedTags.includes(tag.id) 
+                           ? 'bg-blue-600/20 border-blue-500/50 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
+                           : 'bg-slate-950/50 border-slate-800/80 text-slate-600 hover:border-slate-600 hover:text-slate-400 opacity-60'
+                       }`}
+                     >
+                       #{tag.nome}
+                     </button>
+                  ))}
+                  {tags.length === 0 && <span className="text-[10px] text-slate-600 uppercase font-bold pr-2">Sem tags disponíveis</span>}
+                </div>
+              </div>
 
-        {/* Row 3: Tags */}
-        <div>
-          <label className="block text-sm font-medium text-slate-400 mb-2">Tags</label>
-          <div className="flex flex-wrap gap-2">
-            {tags.map(tag => (
-               <button
-                 key={tag.id}
-                 type="button"
-                 disabled={isReadOnly}
-                 onClick={() => toggleTag(tag.id)}
-                 className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                   selectedTags.includes(tag.id) 
-                     ? 'bg-blue-600/20 border-blue-500/50 text-blue-400' 
-                     : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-300'
-                 } ${isReadOnly ? 'opacity-80 cursor-default' : ''}`}
-               >
-                 #{tag.nome}
-               </button>
-            ))}
-            {tags.length === 0 && <span className="text-sm text-slate-600">Nenhuma tag cadastrada.</span>}
+              <div className="pt-6 border-t border-slate-800/50">
+                <div className="bg-slate-950/60 rounded-[1.5rem] p-5 border border-blue-500/10 shadow-inner group/version transition-all hover:border-blue-500/30">
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-2 group-hover/version:text-blue-400 transition-colors">Matriz de Versões</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center border border-blue-500/20 group-hover/version:bg-blue-600/20 transition-all">
+                      <GitCommit className="w-5 h-5 text-blue-500" />
+                    </div>
+                    <div>
+                      <span className="text-lg font-black text-white leading-none block uppercase tracking-tighter">{versions.length || 1} edições</span>
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Registradas no histórico</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Row 4: SqlEditor tomando espaço estendido e isolado na parte de baixo */}
-        <div className="flex flex-col space-y-2 pt-4 border-t border-slate-800">
-          <label className="block text-sm font-medium text-slate-400">Código SQL *</label>
-          <div className="w-full h-[500px]">
-            <SqlEditor 
-              value={codigoSql}
-              onChange={(val) => setCodigoSql(val || '')}
-              onMount={handleEditorDidMount}
-              height="100%"
-              readOnly={isReadOnly}
-            />
-          </div>
-        </div>
-
-        {/* Action Buttons at the bottom for better UX on long scripts */}
-        {!isReadOnly && (
-          <div className="flex justify-end items-center pt-6 border-t border-slate-800 gap-4 mt-8">
-             <button 
-                type="button" 
-                onClick={() => router.back()}
-                className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-white transition-colors"
-                disabled={isSubmitting}
-              >
-                <X className="w-4 h-4" /> Cancelar
-              </button>
-              <button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg font-bold transition-all shadow-lg active:scale-95"
-              >
-                <Save className="w-4 h-4" /> {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
-              </button>
-          </div>
-        )}
       </form>
 
-      {/* Seção de Histórico integrada se houver versões */}
       {!isReadOnly && isEditing && versions.length > 0 && (
-        <section className="animate-in fade-in slide-in-from-bottom-5 duration-1000">
+        <section className="w-full max-w-7xl mx-auto pt-12 border-t border-slate-800/50 animate-in fade-in slide-in-from-bottom-5 duration-1000">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="h-px bg-slate-800 flex-1" />
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em]">Fim do Editor / Início do Histórico</span>
+            <div className="h-px bg-slate-800 flex-1" />
+          </div>
           <ScriptVersionHistory versions={versions} onRestore={handleRestore} />
         </section>
       )}

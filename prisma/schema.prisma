@@ -204,6 +204,7 @@ model ScriptVersion {
   codigoSql   String   @db.Text
   titulo      String
   descricao   String?  @db.Text
+  motivo      String?  @db.Text
   tipoBanco   String   @default("POSTGRESQL")
   sistema     String   @default("SAJ5")
   autorId     String?
