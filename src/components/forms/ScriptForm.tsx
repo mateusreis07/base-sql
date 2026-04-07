@@ -91,6 +91,11 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
       return;
     }
 
+    if (!categoriaId) {
+      setErrorMsg('A Categoria é obrigatória.');
+      return;
+    }
+
     if (!currentCode || !currentCode.trim()) {
       setErrorMsg('O Código SQL é obrigatório e não pode ficar vazio.');
       return;
@@ -224,7 +229,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
                   className="flex items-center gap-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-500/30 active:scale-95 group"
                 >
                   <Save className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  {isSubmitting ? 'Processando...' : 'Salvar Alterações'}
+                  {isSubmitting ? 'Processando...' : isEditing ? 'Salvar Alterações' : 'Criar Script'}
                 </button>
               )}
             </div>
@@ -263,7 +268,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-1">Contextualização (Descrição Detalhada)</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-1"> Descrição/Detalhes</label>
                 <textarea
                   value={descricao}
                   onChange={e => setDescricao(e.target.value)}
@@ -310,6 +315,41 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
                 <p className="text-[10px] text-blue-500/60 font-black uppercase tracking-widest text-right">Registro Permanente de Engenharia</p>
               </div>
             )}
+
+            {!isReadOnly && (
+              <div className="flex items-center justify-end gap-3 pt-8 border-t border-slate-800/40 mt-8">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="group flex items-center gap-2 px-4 py-2 text-slate-500 hover:text-white transition-all text-xs font-bold uppercase tracking-widest"
+                >
+                  <X className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" /> Cancelar
+                </button>
+
+                <div className="flex items-center gap-2">
+                  {isEditing && canDelete && (
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      disabled={isSubmitting}
+                      className="flex items-center justify-center bg-red-950/20 hover:bg-red-900/40 text-red-400 border border-red-900/30 w-11 h-11 rounded-xl transition-all disabled:opacity-50 active:scale-95 shadow-lg shadow-red-900/10"
+                      title="Excluir Script Permanentemente"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex items-center gap-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-500/30 active:scale-95 group"
+                  >
+                    <Save className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    {isSubmitting ? 'Processando...' : isEditing ? 'Salvar Alterações' : 'Criar Script'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-6">
@@ -321,7 +361,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
 
                 <div className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Categoria</label>
+                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Categoria *</label>
                     <CustomSelect
                       value={categoriaId}
                       onChange={setCategoriaId}
@@ -387,7 +427,7 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
 
               <div className="pt-6 border-t border-slate-800/50">
                 <div className="bg-slate-950/60 rounded-[1.5rem] p-5 border border-blue-500/10 shadow-inner group/version transition-all hover:border-blue-500/30">
-                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-2 group-hover/version:text-blue-400 transition-colors">Matriz de Versões</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-2 group-hover/version:text-blue-400 transition-colors">Versões</span>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center border border-blue-500/20 group-hover/version:bg-blue-600/20 transition-all">
                       <GitCommit className="w-5 h-5 text-blue-500" />

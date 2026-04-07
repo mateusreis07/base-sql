@@ -97,7 +97,7 @@ export function ScriptVersionHistory({ versions, onRestore }: ScriptVersionHisto
 
     const oldLines = oldText.split(/\r?\n/);
     const newLines = newText.split(/\r?\n/);
-    
+
     // Matriz de programação dinâmica para LCS
     const m = oldLines.length;
     const n = newLines.length;
@@ -136,12 +136,12 @@ export function ScriptVersionHistory({ versions, onRestore }: ScriptVersionHisto
       const next = unmerged[k + 1];
 
       if (current.type === 'rem' && next && next.type === 'add') {
-        diffRows.push({ 
-          type: 'mod', 
-          oldText: current.text, 
-          newText: next.text, 
-          oldIdx: current.oldIdx, 
-          newIdx: next.newIdx 
+        diffRows.push({
+          type: 'mod',
+          oldText: current.text,
+          newText: next.text,
+          oldIdx: current.oldIdx,
+          newIdx: next.newIdx
         });
         k++;
       } else {
@@ -197,14 +197,14 @@ export function ScriptVersionHistory({ versions, onRestore }: ScriptVersionHisto
 
             const isAdd = row.type === 'add';
             const isRem = row.type === 'rem';
-            const rowClass = isAdd 
-              ? 'bg-emerald-500/10 text-emerald-300 border-l-[3px] border-emerald-500/60' 
-              : isRem 
-              ? 'bg-rose-500/10 text-rose-300 border-l-[3px] border-rose-500/60' 
+            const rowClass = isAdd
+              ? 'bg-emerald-500/10 text-emerald-300 border-l-[3px] border-emerald-500/60'
+              : isRem
+              ? 'bg-rose-500/10 text-rose-300 border-l-[3px] border-rose-500/60'
               : 'text-slate-500 border-l-[3px] border-transparent hover:bg-white/5 opacity-50';
-            
+
             const prefix = isAdd ? '+' : isRem ? '-' : ' ';
-            
+
             return (
               <div key={idx} className={`flex gap-4 group transition-all px-3 py-1 ${rowClass}`}>
                 <div className="flex gap-2 min-w-[80px] select-none opacity-40 text-[10px] font-bold text-right pr-4 border-r border-white/10 italic">
@@ -245,23 +245,23 @@ export function ScriptVersionHistory({ versions, onRestore }: ScriptVersionHisto
           const prevVersion = versions[index + 1];
 
           return (
-            <div 
-              key={version.id} 
+            <div
+              key={version.id}
               className={`bg-slate-900 border transition-all duration-500 rounded-3xl overflow-hidden ${
                 isExpanded ? 'border-blue-500/40 shadow-[0_30px_60px_-15px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/20' : 'border-slate-800/60 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/20'
               }`}
             >
-              <button 
+              <button
                 onClick={() => setExpandedId(isExpanded ? null : version.id)}
                 className="w-full text-left p-6 flex items-center justify-between group relative"
               >
                 {/* Linha indicadora de progresso na esquerda */}
                 {!isLatest && <div className="absolute top-0 bottom-0 left-[2.5rem] w-[1px] bg-slate-800 -z-0" />}
-                
+
                 <div className="flex items-center gap-5 min-w-0 relative z-10">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${
-                    isLatest 
-                      ? 'bg-blue-600 text-white shadow-[0_4px_20px_-5px_rgba(37,99,235,0.5)] scale-110' 
+                    isLatest
+                      ? 'bg-blue-600 text-white shadow-[0_4px_20px_-5px_rgba(37,99,235,0.5)] scale-110'
                       : 'bg-slate-800/80 text-slate-500 group-hover:bg-slate-700 group-hover:text-slate-300'
                   }`}>
                     <Clock className="w-6 h-6" />
@@ -313,7 +313,7 @@ export function ScriptVersionHistory({ versions, onRestore }: ScriptVersionHisto
                     {/* Metadados Unificados (Discretos) */}
                     <div className="md:col-span-2 p-6 bg-slate-950/30 rounded-3xl border border-slate-800/40 hover:border-slate-700/60 transition-all flex flex-col justify-center space-y-4">
                        <div className="space-y-1">
-                          <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Metadata do Snapshot</span>
+                          <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Título / Descrição</span>
                           <p className="text-xs font-bold text-slate-300 uppercase truncate" title={version.titulo}>
                              {version.titulo}
                           </p>
@@ -342,7 +342,7 @@ export function ScriptVersionHistory({ versions, onRestore }: ScriptVersionHisto
                           </div>
                         )}
                      </div>
-                     
+
                      <div className="relative group/diff">
                        {prevVersion ? (
                           renderDiff(prevVersion.codigoSql, version.codigoSql)
@@ -355,13 +355,13 @@ export function ScriptVersionHistory({ versions, onRestore }: ScriptVersionHisto
 
                   <div className="flex flex-col items-center gap-3 pt-4">
                     <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest italic">Deseja descartar as alterações atuais e retornar para este estado?</p>
-                    <button 
+                    <button
                       onClick={() => {
                         if (window.confirm(`Tem certeza que deseja restaurar a Versão ${versions.length - index}? As alterações atuais no editor serão perdidas.`)) {
-                          onRestore?.({ 
-                            titulo: version.titulo, 
-                            descricao: version.descricao || '', 
-                            codigoSql: version.codigoSql 
+                          onRestore?.({
+                            titulo: version.titulo,
+                            descricao: version.descricao || '',
+                            codigoSql: version.codigoSql
                           });
                         }
                       }}
