@@ -12,7 +12,7 @@ interface Version {
   motivo: string | null;
   codigoSql: string;
   createdAt: string | Date;
-  autor?: { name: string | null } | null;
+  autor?: { id?: string; name: string | null } | null;
 }
 
 interface ScriptVersionHistoryProps {

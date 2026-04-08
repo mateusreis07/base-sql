@@ -73,7 +73,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       where: { 
         visibility: 'GLOBAL',
         clones: { some: {} } // Apenas scripts que já foram clonados pelo menos uma vez
-      },
+      } as any,
       take: 3,
       orderBy: { clones: { _count: 'desc' } },
       include: {
@@ -146,7 +146,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
               <div>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Última Atualização</p>
                 <p className="text-sm font-black text-slate-300 mt-2 uppercase tracking-tight leading-none">
-                  {scripts.length > 0 ? formatDistanceToNow(new Date(scripts[0].createdAt), { addSuffix: true, locale: ptBR }) : 'Nenhum registro'}
+                  {scripts.length > 0 ? formatDistanceToNow(new Date((scripts[0] as any).createdAt), { addSuffix: true, locale: ptBR }) : 'Nenhum registro'}
                 </p>
               </div>
             </div>
@@ -174,7 +174,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
                     <span className={`text-sm font-black ${i === 0 ? 'text-amber-500' : 'text-slate-600'}`}>0{i + 1}</span>
                     <div>
                       <p className="text-sm font-black text-slate-200 group-hover:text-amber-400 transition-colors">{s.titulo}</p>
-                      <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">por {s.autor?.name} • {s.team?.nome}</p>
+                      <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">por {(s as any).autor?.name} • {(s as any).team?.nome}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">

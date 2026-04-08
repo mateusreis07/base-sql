@@ -29,7 +29,7 @@ export default async function CategoriasPage() {
           teamId: userTeamId
         }
       });
-    } else if (!existingClonados.isSystem) {
+    } else if (!(existingClonados as any).isSystem) {
       // Se já existe mas não é de sistema, atualiza para ser de sistema
       await prisma.categoria.update({
         where: { id: existingClonados.id },

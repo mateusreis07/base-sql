@@ -10,7 +10,7 @@ import { ScriptVersionHistory } from '@/components/ui/ScriptVersionHistory';
 
 type Categoria = { id: string; nome: string; isSystem?: boolean };
 type Tag = { id: string; nome: string };
-type Version = { id: string; titulo: string; descricao: string | null; motivo: string | null; codigoSql: string; createdAt: string | Date; autor?: { name: string | null } };
+type Version = { id: string; titulo: string; descricao: string | null; motivo: string | null; codigoSql: string; createdAt: string | Date; autor?: { id?: string; name: string | null } };
 
 import { CustomSelect } from '@/components/ui/CustomSelect';
 
@@ -32,7 +32,7 @@ interface ScriptFormProps {
   versions?: Version[];
   canDelete?: boolean;
   clonadoDe?: {
-    autor?: { name: string | null } | null;
+    autor?: { id: string; name: string | null } | null;
     team?: { nome: string } | null;
   } | null;
 }

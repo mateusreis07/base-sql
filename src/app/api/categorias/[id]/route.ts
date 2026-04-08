@@ -14,7 +14,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     if (!existing) return NextResponse.json({ error: 'Nao encontrado' }, { status: 404 });
 
     // Proteção de categoria de sistema
-    if (existing.isSystem) {
+    if ((existing as any).isSystem) {
       return NextResponse.json({ error: 'Categorias de sistema não podem ser editadas' }, { status: 403 });
     }
 
@@ -57,7 +57,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     if (!existing) return NextResponse.json({ error: 'Nao encontrado' }, { status: 404 });
 
     // Proteção de categoria de sistema
-    if (existing.isSystem) {
+    if ((existing as any).isSystem) {
       return NextResponse.json({ error: 'Categorias de sistema não podem ser deletadas' }, { status: 403 });
     }
 
