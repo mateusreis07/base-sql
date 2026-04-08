@@ -18,13 +18,27 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
   const isN1 = user.role === 'NIVEL1';
   const { q } = await searchParams;
   
-  // Busca totais para o dashboard
-  const totalScriptsSistema = await prisma.script.count();
+  // Busca totais para o dashboard respeitando visibilidade
+  const totalScriptsSistema = await prisma.script.count({
+    where: {
+      OR: [
+        { visibility: 'GLOBAL' },
+        { teamId: user.teamId || 'no-team' }
+      ]
+    }
+  });
+
   const totalScriptsTime = user.teamId 
     ? await prisma.script.count({ where: { teamId: user.teamId } })
     : 0;
 
-  let where: any = {}; // Todos são globais agora
+  // Filtro de visibilidade: GLOBAL ou do próprio TIME
+  let where: any = {
+    OR: [
+      { visibility: 'GLOBAL' },
+      { teamId: user.teamId || 'no-team' }
+    ]
+  };
 
   if (q) {
     where = {

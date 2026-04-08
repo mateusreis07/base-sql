@@ -19,12 +19,20 @@ export default async function EditScriptPage({ params }: { params: Promise<{ id:
     include: { 
       categoria: { select: { nome: true } },
       tags: { include: { Tag: true } },
-      autor: { include: { team: true } },
+      autor: { 
+        select: { id: true, name: true, image: true, team: true } 
+      },
       team: true,
       favorites: { where: { userId: session.user.id } },
       versions: {
         orderBy: { createdAt: 'desc' },
-        include: { autor: { select: { name: true } } }
+        include: { autor: { select: { id: true, name: true } } }
+      },
+      clonadoDe: {
+        include: {
+          autor: { select: { id: true, name: true } },
+          team: { select: { nome: true } }
+        }
       }
     }
   });
@@ -58,9 +66,19 @@ export default async function EditScriptPage({ params }: { params: Promise<{ id:
   if (!isReadOnly) {
     categorias = await prisma.categoria.findMany({ 
       where: {
-        OR: [
-          { teamId: userTeamId },
-          { id: script.categoriaId || undefined }
+        AND: [
+          {
+            OR: [
+              { teamId: userTeamId },
+              { id: script.categoriaId || undefined }
+            ]
+          },
+          {
+            OR: [
+              { isSystem: false },
+              { id: script.categoriaId || undefined }
+            ]
+          }
         ]
       }, 
       orderBy: { nome: 'asc' } 
@@ -109,6 +127,7 @@ export default async function EditScriptPage({ params }: { params: Promise<{ id:
             isReadOnly={isReadOnly} 
             versions={script.versions as any}
             canDelete={canDelete}
+            clonadoDe={script.clonadoDe as any}
           />
         )}
       </section>

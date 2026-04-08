@@ -13,6 +13,11 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     const existing = await prisma.categoria.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ error: 'Nao encontrado' }, { status: 404 });
 
+    // Proteção de categoria de sistema
+    if (existing.isSystem) {
+      return NextResponse.json({ error: 'Categorias de sistema não podem ser editadas' }, { status: 403 });
+    }
+
     if (userRole !== 'ADMIN' && existing.teamId !== userTeamId) {
       return NextResponse.json({ error: 'Recurso nao pertence ao seu time' }, { status: 403 });
     }
@@ -50,6 +55,11 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
 
     const existing = await prisma.categoria.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ error: 'Nao encontrado' }, { status: 404 });
+
+    // Proteção de categoria de sistema
+    if (existing.isSystem) {
+      return NextResponse.json({ error: 'Categorias de sistema não podem ser deletadas' }, { status: 403 });
+    }
 
     if (userRole !== 'ADMIN' && existing.teamId !== userTeamId) {
       return NextResponse.json({ error: 'Recurso nao pertence ao seu time' }, { status: 403 });

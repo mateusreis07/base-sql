@@ -9,7 +9,14 @@ import { ptBR } from 'date-fns/locale';
 import { ScriptCard } from '@/components/ui/ScriptCard';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 
-type Categoria = { id: string; nome: string; cor?: string | null; team?: { id: string; nome: string } | null; _count?: { scripts: number } };
+type Categoria = { 
+  id: string; 
+  nome: string; 
+  cor?: string | null; 
+  isSystem?: boolean;
+  team?: { id: string; nome: string } | null; 
+  _count?: { scripts: number } 
+};
 type Tag = { id: string; nome: string };
 type Script = {
   id: string;
@@ -53,14 +60,9 @@ export function ExploreClient({ initialScripts, categorias, tags, teams, current
     categoriasByTeam[team.nome] = categorias.filter(c => c.team?.id === team.id);
   });
 
-  // Categorias Globais (sem time)
-  const globalCats = categorias.filter(c => !c.team);
+  // Categorias Globais (apenas as que realmente não possuem time e não são de sistema de terceiros)
+  const globalCats = categorias.filter(c => !c.team && !c.isSystem);
   if (globalCats.length > 0) {
-    // Onde colocar o Global? Geralmente no topo ou no fim.
-    // Usuário quer "times que tiverem mais scripts na frente".
-    // Vou inserir no objeto e deixar a renderização seguir a ordem de inserção.
-    // Mas se Global tiver muitos scripts, ele deve ir pra frente?
-    // Vamos considerar Global como um "time" para o cálculo.
     categoriasByTeam['Global'] = globalCats;
   }
 
@@ -198,7 +200,7 @@ export function ExploreClient({ initialScripts, categorias, tags, teams, current
                   {isOpen && (
                     <ul className="pl-6 space-y-0.5 border-l border-slate-900 ml-4.5 mt-1 animate-in fade-in slide-in-from-left-1 duration-200">
                       {cats.length === 0 && (
-                        <li className="px-3 py-1.5 text-[9px] text-slate-700 uppercase font-bold italic tracking-tighter">Vazio</li>
+                        <li className="px-3 py-1.5 text-[9px] text-slate-800 uppercase font-medium italic tracking-tighter">Nenhuma pasta pública</li>
                       )}
                       {cats.map(cat => (
                         <li key={cat.id}>

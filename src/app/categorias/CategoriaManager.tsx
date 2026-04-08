@@ -5,7 +5,14 @@ import { Plus, Folder, Edit2, Trash2, X, Save, Check, ChevronDown } from 'lucide
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-type Categoria = { id: string; nome: string; descricao: string | null; cor: string | null; parentId: string | null };
+type Categoria = { 
+  id: string; 
+  nome: string; 
+  descricao: string | null; 
+  cor: string | null; 
+  parentId: string | null;
+  isSystem?: boolean;
+};
 
 export function CategoriaManager({ initialCategorias, isNivel1 = false }: { initialCategorias: Categoria[], isNivel1?: boolean }) {
   const router = useRouter();
@@ -208,30 +215,41 @@ export function CategoriaManager({ initialCategorias, isNivel1 = false }: { init
           <ul className="divide-y divide-slate-800">
             {categorias.map(cat => (
               <li key={cat.id} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 text-left">
                   <div 
-                    className="w-4 h-4 rounded-full border border-slate-700" 
+                    className="w-4 h-4 rounded-full border border-slate-700 shrink-0" 
                     style={{ backgroundColor: cat.cor || '#3b82f6' }} 
                   />
                   <Link 
                     href={`/explore?categoria=${cat.id}`} 
-                    className="group"
+                    className="group flex flex-col"
                   >
-                    <h3 className="font-bold text-white uppercase tracking-wide group-hover:text-blue-400 group-hover:underline underline-offset-4 transition-all">
+                    <h3 className="font-bold text-white uppercase tracking-wide group-hover:text-blue-400 group-hover:underline underline-offset-4 transition-all flex items-center gap-2">
                       {cat.nome}
+                      {cat.isSystem && (
+                        <span className="text-[8px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded border border-slate-700 font-black tracking-[0.1em]">SISTEMA</span>
+                      )}
                     </h3>
-                    {cat.descricao && <p className="text-sm text-slate-500">{cat.descricao}</p>}
+                    {cat.descricao && <p className="text-sm text-slate-500 line-clamp-1">{cat.descricao}</p>}
                   </Link>
                 </div>
                 {!isNivel1 && (
-                <div className="flex items-center gap-4">
-                  <button onClick={() => openForm(cat)} className="text-slate-400 hover:text-blue-400 transition-colors" title="Editar">
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleDelete(cat.id, cat.nome)} className="text-slate-400 hover:text-red-400 transition-colors" title="Excluir">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    {!cat.isSystem ? (
+                      <>
+                        <button onClick={() => openForm(cat)} className="text-slate-400 hover:text-blue-400 transition-colors" title="Editar">
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(cat.id, cat.nome)} className="text-slate-400 hover:text-red-400 transition-colors" title="Excluir">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-950/50 border border-slate-800/50 rounded-lg text-slate-600 italic text-[10px] font-bold">
+                        Protegido
+                      </div>
+                    )}
+                  </div>
                 )}
               </li>
             ))}

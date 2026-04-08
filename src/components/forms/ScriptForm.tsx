@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { SqlEditor } from '@/components/editor/SqlEditor';
-import { Save, X, AlertCircle, Trash2, ChevronDown, Check, Database, Terminal, GitCommit } from 'lucide-react';
+import { Save, X, AlertCircle, Trash2, ChevronDown, Check, Database, Terminal, GitCommit, GitFork } from 'lucide-react';
 
 import { ScriptVersionHistory } from '@/components/ui/ScriptVersionHistory';
 
-type Categoria = { id: string; nome: string };
+type Categoria = { id: string; nome: string; isSystem?: boolean };
 type Tag = { id: string; nome: string };
 type Version = { id: string; titulo: string; descricao: string | null; motivo: string | null; codigoSql: string; createdAt: string | Date; autor?: { name: string | null } };
 
@@ -30,9 +31,13 @@ interface ScriptFormProps {
   isReadOnly?: boolean;
   versions?: Version[];
   canDelete?: boolean;
+  clonadoDe?: {
+    autor?: { name: string | null } | null;
+    team?: { nome: string } | null;
+  } | null;
 }
 
-export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, versions = [], canDelete = false }: ScriptFormProps) {
+export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, versions = [], canDelete = false, clonadoDe }: ScriptFormProps) {
   const router = useRouter();
   const editorRef = useRef<any>(null);
 
@@ -57,19 +62,17 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
 
   const handleRestore = (version: { titulo: string; descricao: string; codigoSql: string }) => {
     try {
-      setSuccessMsg(''); // Limpa mensagens anteriores
+      setSuccessMsg(''); 
       setTitulo(version.titulo);
       setDescricao(version.descricao || '');
       setCodigoSql(version.codigoSql);
       setTipoBanco((version as any).tipoBanco || 'POSTGRESQL');
       setSistema((version as any).sistema || 'SAJ5');
 
-      // Atualiza o editor Monaco via ref para forçar a mudança visual imediata
       if (editorRef.current) {
         editorRef.current.setValue(version.codigoSql);
       }
 
-      // Forçar scroll para o topo para que o usuário veja os campos alterados
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       console.error('Falha ao restaurar:', err);
@@ -82,7 +85,6 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
     setErrorMsg('');
     setSuccessMsg('');
 
-    // Obter o valor real do editor (bypass React state sync issues)
     const currentCode = editorRef.current?.getValue ? editorRef.current.getValue() : codigoSql;
     const isSqlChanged = isEditing && currentCode !== initialData.codigoSql;
 
@@ -137,13 +139,11 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
       if (isEditing) {
         setIsSubmitting(false);
         setSuccessMsg('Alterações salvas com sucesso!');
-        setMotivo(''); // Limpar o motivo após salvar
-        router.refresh(); // Refresh Server Components data
+        setMotivo(''); 
+        router.refresh(); 
 
-        // Limpar após 5s
         setTimeout(() => setSuccessMsg(''), 5000);
       } else {
-        // Se for novo, direciona para o editor do script recém-criado
         router.push(`/scripts/${savedScript.id}`);
         router.refresh();
       }
@@ -353,6 +353,32 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
           </div>
 
           <div className="space-y-6">
+            {clonadoDe && (
+              <div className="bg-blue-600/5 border border-blue-500/20 p-6 rounded-2xl space-y-3 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <GitFork className="w-12 h-12" />
+                </div>
+                <h3 className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                  <GitFork className="w-3.5 h-3.5" /> Origem do Script
+                </h3>
+                <div className="space-y-2 relative z-10">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-slate-500 uppercase">Autor Original</span>
+                    <Link 
+                      href={clonadoDe.autor?.id ? `/perfil/${clonadoDe.autor.id}` : '#'} 
+                      className="text-sm font-black text-white hover:text-blue-400 transition-colors"
+                    >
+                      {clonadoDe.autor?.name || 'Autor Desconhecido'}
+                    </Link>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-slate-500 uppercase">Time de Origem</span>
+                    <span className="text-sm font-black text-blue-400">{clonadoDe.team?.nome || 'Time Desconhecido'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="bg-slate-900/60 border border-slate-800/60 p-6 rounded-[2rem] space-y-8">
               <div>
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
@@ -365,12 +391,17 @@ export function ScriptForm({ initialData, categorias, tags, isReadOnly = false, 
                     <CustomSelect
                       value={categoriaId}
                       onChange={setCategoriaId}
-                      disabled={isReadOnly}
+                      disabled={isReadOnly || categorias.find(c => c.id === categoriaId)?.isSystem}
                       options={[
                         { value: '', label: 'Nenhuma Selecionada' },
                         ...categorias.map(cat => ({ value: cat.id, label: cat.nome }))
                       ]}
                     />
+                    {categorias.find(c => c.id === categoriaId)?.isSystem && !isReadOnly && (
+                      <p className="text-[9px] text-blue-500 font-bold uppercase tracking-tight mt-1 animate-pulse">
+                        Categoria de Sistema (Não pode ser alterada)
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">

@@ -21,7 +21,10 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { cloneScript } from '@/app/actions/script-actions';
+import { GitFork } from 'lucide-react';
 
 interface ScriptViewProps {
   script: {
@@ -33,7 +36,7 @@ interface ScriptViewProps {
     sistema: string;
     createdAt: Date | string;
     categoria?: { nome: string } | null;
-    autor?: { name: string | null; team?: { nome: string } | null } | null;
+    autor?: { id: string; name: string | null; team?: { nome: string } | null } | null;
     tags?: { Tag: { nome: string } }[];
     versions: {
       id: string;
@@ -41,8 +44,12 @@ interface ScriptViewProps {
       descricao: string | null;
       motivo: string | null;
       createdAt: Date | string;
-      autor?: { name: string | null } | null;
+      autor?: { id: string; name: string | null } | null;
     }[];
+    clonadoDe?: {
+      autor?: { id: string; name: string | null } | null;
+      team?: { nome: string } | null;
+    } | null;
   };
   isFavoriteInitial: boolean;
 }
@@ -51,6 +58,7 @@ export function ScriptView({ script, isFavoriteInitial }: ScriptViewProps) {
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(isFavoriteInitial);
   const [isToggling, setIsToggling] = useState(false);
+  const [isCloning, setIsCloning] = useState(false);
 
   const toggleFavorite = async () => {
     if (isToggling) return;
@@ -65,6 +73,27 @@ export function ScriptView({ script, isFavoriteInitial }: ScriptViewProps) {
       toast.error('Erro ao processar favorito');
     } finally {
       setIsToggling(false);
+    }
+  };
+
+  const handleClone = async () => {
+    if (!window.confirm('Deseja clonar este script para a estrutura do seu time? Ele será salvo na categoria "Clonados" com visibilidade restrita à sua equipe.')) {
+      return;
+    }
+
+    setIsCloning(true);
+    const loadingToast = toast.loading('Clonando script...');
+
+    try {
+      const result = await cloneScript(script.id);
+      if (result.success) {
+        toast.success('Script clonado com sucesso!', { id: loadingToast });
+        router.push(`/scripts/${result.scriptId}`);
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao clonar script', { id: loadingToast });
+    } finally {
+      setIsCloning(false);
     }
   };
 
@@ -104,7 +133,12 @@ export function ScriptView({ script, isFavoriteInitial }: ScriptViewProps) {
           <div className="flex flex-wrap gap-y-4 gap-x-8 text-slate-400 text-sm border-t border-slate-800/50 pt-6">
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-slate-500" />
-              <span className="font-medium text-slate-300">{script.autor?.name || 'Autor Desconhecido'}</span>
+              <Link 
+                href={script.autor?.id ? `/perfil/${script.autor.id}` : '#'} 
+                className="font-medium text-slate-300 hover:text-blue-400 transition-colors"
+              >
+                {script.autor?.name || 'Autor Desconhecido'}
+              </Link>
             </div>
             {script.autor?.team?.nome && (
               <div className="flex items-center gap-2">
@@ -179,7 +213,7 @@ export function ScriptView({ script, isFavoriteInitial }: ScriptViewProps) {
                       
                       <div className="flex items-center gap-2 text-xs text-slate-400">
                         <GitCommit className="w-3 h-3 text-slate-600" />
-                        <span>por <span className="text-slate-300 font-medium">{v.autor?.name || 'Autor Desconhecido'}</span></span>
+                        <span>por <Link href={v.autor?.id ? `/perfil/${v.autor.id}` : '#'} className="text-slate-300 font-medium hover:text-blue-400 transition-colors">{v.autor?.name || 'Autor Desconhecido'}</Link></span>
                         {v.motivo ? (
                           <div className="ml-2 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-[11px] text-blue-300 font-medium max-w-[400px] truncate">
                             “{v.motivo}”
@@ -200,6 +234,32 @@ export function ScriptView({ script, isFavoriteInitial }: ScriptViewProps) {
 
         {/* Sidebar de Contexto */}
         <div className="space-y-6">
+          {script.clonadoDe && (
+            <div className="bg-blue-600/5 border border-blue-500/20 p-6 rounded-2xl space-y-3 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                <GitFork className="w-12 h-12" />
+              </div>
+              <h3 className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                <GitFork className="w-3.5 h-3.5" /> Origem do Script
+              </h3>
+              <div className="space-y-2 relative z-10">
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase">Autor Original</span>
+                  <Link 
+                    href={script.clonadoDe.autor?.id ? `/perfil/${script.clonadoDe.autor.id}` : '#'} 
+                    className="text-sm font-black text-white hover:text-blue-400 transition-colors"
+                  >
+                    {script.clonadoDe.autor?.name || 'Autor Desconhecido'}
+                  </Link>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase">Time de Origem</span>
+                  <span className="text-sm font-black text-blue-400">{script.clonadoDe.team?.nome || 'Time Desconhecido'}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="bg-slate-950/50 border border-slate-800 p-6 rounded-2xl space-y-6">
             <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest border-b border-slate-800 pb-3">
               Ficha Técnica
@@ -251,6 +311,21 @@ export function ScriptView({ script, isFavoriteInitial }: ScriptViewProps) {
                 </div>
               </div>
             )}
+
+            {/* Ação de Clonagem Premium */}
+            <div className="pt-4 mt-6 border-t border-slate-800/80">
+              <button
+                onClick={handleClone}
+                disabled={isCloning}
+                className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white py-4 rounded-2xl transition-all shadow-lg shadow-blue-600/20 font-black uppercase text-[10px] tracking-widest active:scale-95 group"
+              >
+                <GitFork className={`w-4 h-4 transition-transform ${isCloning ? 'animate-pulse' : 'group-hover:rotate-12'}`} />
+                {isCloning ? 'Clonando...' : 'Clonar para o Time'}
+              </button>
+              <p className="text-[9px] text-slate-500 text-center mt-3 font-medium uppercase tracking-tighter">
+                Cria uma cópia privada na categoria <span className="text-blue-400">Clonados</span>
+              </p>
+            </div>
           </div>
           
           <button

@@ -13,8 +13,19 @@ export default async function NewScriptPage() {
   const userTeamId = (session.user as any)?.teamId;
   const whereAuth = userRole === 'ADMIN' ? {} : { teamId: userTeamId };
 
-  const categorias = await prisma.categoria.findMany({ where: whereAuth, orderBy: { nome: 'asc' } });
-  const tags = await prisma.tag.findMany({ where: whereAuth, orderBy: { nome: 'asc' } });
+  // Filtra categorias apenas do time (ou todas se Admin) e QUE NÃO SEJAM de sistema
+  const categorias = await prisma.categoria.findMany({ 
+    where: { 
+      ...whereAuth,
+      isSystem: false 
+    }, 
+    orderBy: { nome: 'asc' } 
+  });
+  
+  const tags = await prisma.tag.findMany({ 
+    where: whereAuth, 
+    orderBy: { nome: 'asc' } 
+  });
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">

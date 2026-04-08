@@ -11,9 +11,15 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   
   const { q, categoria, tag, tipoBanco, sistema } = await searchParams;
   const currentUserId = (session?.user as any)?.id || '';
+  const userTeamId = (session?.user as any)?.teamId;
 
-  // Filtro base para busca de scripts
-  let where: any = {};
+  // Filtro base para busca de scripts respeitando visibilidade
+  let where: any = {
+    OR: [
+      { visibility: 'GLOBAL' },
+      { teamId: userTeamId || 'no-team' }
+    ]
+  };
 
   if (q) {
     where.AND = where.AND || [];
@@ -42,9 +48,20 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
     where.sistema = sistema;
   }
 
-  // Executa buscas em paralelo para performance
+  // Carrega categorias com filtro de privacidade
   const [categorias, tags, scripts, teams] = await Promise.all([
     prisma.categoria.findMany({ 
+      where: {
+        OR: [
+          { teamId: userTeamId }, // Minhas pastas (todas)
+          { 
+            AND: [
+              { isSystem: false }, // Pastas públicas/normais
+              { OR: [{ teamId: null }, { teamId: { not: userTeamId } }] }
+            ] 
+          }
+        ]
+      },
       include: { 
         team: { select: { id: true, nome: true } },
         _count: { select: { scripts: true } }
@@ -52,7 +69,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
       orderBy: { nome: 'asc' } 
     }),
     prisma.tag.findMany({ 
-      where: { scripts: { some: {} } }, // Mostra tags que estejam em uso
+      where: { scripts: { some: {} } },
       orderBy: { nome: 'asc' } 
     }),
     prisma.script.findMany({

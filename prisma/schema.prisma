@@ -13,6 +13,7 @@ model Categoria {
   nome        String
   descricao   String?
   cor         String?
+  isSystem    Boolean     @default(false)
   parentId    String?
   teamId      String?
   parent      Categoria?  @relation("SubCategorias", fields: [parentId], references: [id], onDelete: SetNull)
@@ -49,6 +50,10 @@ model Script {
   team        Team?       @relation(fields: [teamId], references: [id], onDelete: SetNull)
   favorites   Favorite[]
   versions    ScriptVersion[]
+  
+  clonadoDeId String?
+  clonadoDe   Script?     @relation("Clonagem", fields: [clonadoDeId], references: [id], onDelete: SetNull)
+  clones      Script[]    @relation("Clonagem")
 }
 
 model Tag {
